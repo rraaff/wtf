@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+ <extension
+       id="rbBuilder"
+       name="Builder para chequear los RB"
+       point="org.eclipse.core.resources.builders">
+    <builder hasNature="false">
+       <run class="wtfplugin.builder.ResourceBundleBuilder"/>
+    </builder>
+ </extension>
+
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            id="LTODeployPlugin.actionSet1"
+            label="WTF"
+            visible="true">
+			<action      class="wtfplugin.actions.JarsToProjects"
+               icon="icons/link.gif"
+               id="wtfplugin.actions.JarsToProjects"
+               label="Convertir relaciones a projectos"
+               style="push"
+               toolbarPath="window/additions"/>
+
+      <action
+               class="wtfplugin.actions.LaunchTomcat"
+               icon="icons/16_tomcat.gif"
+               id="wtf.action.launchtomcat"
+               label="Launch tomcat"
+               menubarPath="wtf.menu/launchactions"
+               style="push"
+               toolbarPath="window/additions"/>
+      </actionSet>
+      
+               
+            </extension>
+      
+      <extension
+         point="org.eclipse.ui.popupMenus">
+         
+         <objectContribution
+            objectClass="org.eclipse.core.resources.IResource"
+            nameFilter="*"
+            id="com.despegar">
+         <menu
+               label="&amp;Despegar"
+               path="additions"
+               id="com.despegar">
+            <separator
+                  name="group1">
+            </separator>
+         </menu>
+         </objectContribution>
+         
+         <objectContribution
+            objectClass="org.eclipse.core.resources.IResource"
+            nameFilter="*"
+            id="com.despegar.generateversion">
+         <action
+               class="wtfplugin.actions.NewVersion"
+               icon="icons/link.gif"
+               id="wtfplugin.actions.NewVersion"
+               label="Crear nueva version"
+               menubarPath="com.despegar/group1"
+               style="push"
+               enablesFor="1"
+               toolbarPath="window/additions">
+            <enablement>
+               <and>
+                  <objectClass name="org.eclipse.core.resources.IFolder"/>
+               </and>
+            </enablement>
+         </action>
+         </objectContribution>
+         
+          <objectContribution
+            objectClass="org.eclipse.core.resources.IResource"
+            nameFilter="*"
+            id="com.despegar.generatescript">
+         <action
+               class="wtfplugin.actions.NewScript"
+               icon="icons/link.gif"
+               id="wtfplugin.actions.NewScript"
+               label="Crear un script"
+               menubarPath="com.despegar/group1"
+               style="push"
+               enablesFor="1"
+               toolbarPath="window/additions">
+            <enablement>
+               <and>
+                  <objectClass name="org.eclipse.core.resources.IFolder"/>
+               </and>
+            </enablement>
+         </action>
+         
+         objectContribution
+            objectClass="org.eclipse.core.resources.ReleaseVersion"
+            nameFilter="*"
+            id="com.despegar.releaseversion">
+         <action
+               class="wtfplugin.actions.ReleaseVersion"
+               icon="icons/link.gif"
+               id="wtfplugin.actions.ReleaseVersion"
+               label="Genera el release de la version"
+               menubarPath="com.despegar/group1"
+               style="push"
+               enablesFor="1"
+               toolbarPath="window/additions">
+            <enablement>
+               <and>
+                  <objectClass name="org.eclipse.core.resources.IFolder"/>
+               </and>
+            </enablement>
+         </action>
+      </objectContribution>
+      
+      </extension>
+      
+      <extension
+       point="org.eclipse.ui.startup">
+    <startup class="wtfplugin.startup.ConfigureEclipse"/>
+ </extension>
+ 
+ <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="toolbar:org.eclipse.ui.trim.status?after=additions">
+         <toolbar
+               id="wtfplugin.toolbar1">
+            <control
+                  class="wtfplugin.statusbar.WTFStatusBar"
+                  id="wtfplugin.statusbar.WTFStatusBar">
+            </control>
+         </toolbar> 
+        </menuContribution>
+   </extension>
+ 
+      <!--extension
+       point="org.eclipse.debug.core.launchDelegates">
+    <launchDelegate
+          delegate="wtfplugin.launch.ProjectsFirstLauncher"
+          delegateDescription="Agregado de projectos antes en el classpath"
+          id="LTODeployPlugin.launchDelegate1"
+          modes="run,debug"
+          name="ProjectFirst in classpath"
+          type="org.eclipse.jdt.launching.localJavaApplication">
+    </launchDelegate>
+   </extension-->
+   
+   
+
+</plugin>
