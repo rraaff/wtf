@@ -66,14 +66,14 @@ public class LaunchTomcat extends ActionDelegate implements IWorkbenchWindowActi
 			String port ="8080";
 			String serverPort = "8208";
 			
-			launchTomcat(project, webappname, port, serverPort);
+			launchTomcat(project, webappname, port, serverPort, "", "");
 			
 		} catch (Exception e) {
 			Activator.showException(e);
 		}
 	}
 
-	public static void launchTomcat(IProject project, String webappname, String port, String serverPort) throws CoreException, IOException, JavaModelException {
+	public static void launchTomcat(IProject project, String webappname, String port, String serverPort, String contextContent, String jvmArgs) throws CoreException, IOException, JavaModelException {
 		File file;
 		ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
 		ILaunchConfigurationType type = manager.getLaunchConfigurationType(IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION);
@@ -140,6 +140,7 @@ public class LaunchTomcat extends ActionDelegate implements IWorkbenchWindowActi
 		newTempServer = newTempServer.replace("@httpport@", port);
 		newTempServer = newTempServer.replace("@docbase@", docbase);
 		newTempServer = newTempServer.replace("@workdir@", workdir);
+		newTempServer = newTempServer.replace("@contextcontent@", contextContent);
 		
 		
 		File f = new File(System.getProperty("java.io.tmpdir") + "/temp_server.xml");
@@ -163,7 +164,7 @@ public class LaunchTomcat extends ActionDelegate implements IWorkbenchWindowActi
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, classpath);
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, false);
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, "-Djava.endorsed.dirs=\"..\\common\\endorsed\""
-				+ "-Dcatalina.base=\"..\"" + "-Dcatalina.home=\"..\"" + "-Djava.io.tmpdir=\"..\\temp\"");
+				+ "-Dcatalina.base=\"..\"" + "-Dcatalina.home=\"..\"" + "-Djava.io.tmpdir=\"..\\temp\" " + (jvmArgs == null ? "" : jvmArgs));
 		
 		
 		File workingDir = JavaCore.getClasspathVariable("TOMCAT_HOME").append("bin").toFile();

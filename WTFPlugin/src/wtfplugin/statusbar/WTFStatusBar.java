@@ -135,7 +135,7 @@ public class WTFStatusBar extends WorkbenchWindowControlContribution {
 				IFile file = project.getFile(".wtf");
 				Properties props = new Properties();
 				props.load(file.getContents());
-				LaunchTomcat.launchTomcat(project, props.getProperty("contextPath", "/" + project.getName()), props.getProperty("port", "8080"), props.getProperty("serverport", "8208"));
+				LaunchTomcat.launchTomcat(project, props.getProperty("contextPath", "/" + project.getName()), props.getProperty("port", "8080"), props.getProperty("serverport", "8208"), props.getProperty("contextcontent",""), props.getProperty("jvmargs",""));
 			} catch (JavaModelException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
