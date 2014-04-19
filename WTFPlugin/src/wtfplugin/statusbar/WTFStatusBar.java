@@ -17,7 +17,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -47,7 +48,7 @@ public class WTFStatusBar extends WorkbenchWindowControlContribution {
 	@Override
 	protected Control createControl(Composite parent) {
 		comp = new Composite(parent, SWT.NONE);
-		comp.setSize(120, 16);
+		comp.setSize(120, 25);
 		// Give some room around the control
 		
 		RowLayout rowLayout = new RowLayout();
@@ -55,6 +56,8 @@ public class WTFStatusBar extends WorkbenchWindowControlContribution {
 		rowLayout.pack = true;
 		rowLayout.justify = true;
 		rowLayout.type = SWT.HORIZONTAL;
+		rowLayout.marginTop = 0;
+		rowLayout.marginBottom = 0;
 		
 		comp.setLayout(rowLayout);
 
@@ -91,15 +94,15 @@ public class WTFStatusBar extends WorkbenchWindowControlContribution {
 	}
 
 	public void refresh() {
-		Button b = new Button(comp, SWT.NONE);
-		b.setText("Refresh");
+		Button b = null ; //= new Button(comp, SWT.NONE);
+		/*b.setText("Refresh");
 		b.addMouseListener(new MouseListener() {
 			public void mouseUp(MouseEvent e) {
 				// TODO WTFStatusBar.this.refresh();
 			}
 			public void mouseDoubleClick(MouseEvent e) {}
 			public void mouseDown(MouseEvent e) {}
-		});
+		});*/
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		IProject[] projects = root.getProjects();
 		for (IProject pro : projects) {
@@ -109,6 +112,9 @@ public class WTFStatusBar extends WorkbenchWindowControlContribution {
 						IFile file = pro.getFile(".wtf");
 						if (file != null && file.exists()) {
 								b = new Button(comp, SWT.NONE);
+								RowData gd_btnVersionComercial = new RowData();
+								gd_btnVersionComercial.height = 24;
+								b.setLayoutData(gd_btnVersionComercial);
 								b.setText(pro.getName());
 								b.addMouseListener(new LaunchTomcatMouseListener(pro));
 							}
