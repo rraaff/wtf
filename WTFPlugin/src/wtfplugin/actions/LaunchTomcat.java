@@ -95,7 +95,7 @@ public class LaunchTomcat extends ActionDelegate implements IWorkbenchWindowActi
 		IPath toolsPath = new Path(jdkHome.getAbsolutePath()).append("lib").append("tools.jar");
 		IRuntimeClasspathEntry toolsEntry = JavaRuntime.newArchiveRuntimeClasspathEntry(toolsPath);
 		toolsEntry.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
-		IPath bootstrapPath = new Path("TOMCAT_HOME").append("bin").append("bootstrap.jar");
+		IPath bootstrapPath = new Path("TOMCAT6_HOME").append("bin").append("bootstrap.jar");
 		IRuntimeClasspathEntry bootstrapEntry = JavaRuntime.newVariableRuntimeClasspathEntry(bootstrapPath);
 		bootstrapEntry.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
 		IPath systemLibsPath = new Path(JavaRuntime.JRE_CONTAINER);
@@ -164,14 +164,14 @@ public class LaunchTomcat extends ActionDelegate implements IWorkbenchWindowActi
 				+ "-Dcatalina.base=\"..\"" + "-Dcatalina.home=\"..\"" + "-Djava.io.tmpdir=\"..\\temp\" " + (jvmArgs == null ? "" : jvmArgs));
 		
 		
-		File workingDir = JavaCore.getClasspathVariable("TOMCAT_HOME").append("bin").toFile();
+		File workingDir = JavaCore.getClasspathVariable("TOMCAT6_HOME").append("bin").toFile();
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_WORKING_DIRECTORY, workingDir.getAbsolutePath());
 		ILaunchConfiguration configuration = workingCopy.doSave();
 		DebugUITools.launch(configuration, ILaunchManager.DEBUG_MODE);
 	}
 
 	public static void addTomcatJarToClasspath(List classpath, String jar) throws CoreException {
-		IPath jspapijar = new Path("TOMCAT_HOME").append("lib").append(jar);
+		IPath jspapijar = new Path("TOMCAT6_HOME").append("lib").append(jar);
 		IRuntimeClasspathEntry jspapijarEntry = JavaRuntime.newVariableRuntimeClasspathEntry(jspapijar);
 		classpath.add(jspapijarEntry.getMemento());
 	}

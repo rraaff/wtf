@@ -61,7 +61,7 @@ public class ConfigureEclipse implements IStartup {
 	public void performChecks() {
 		final NullProgressMonitor monitor = new NullProgressMonitor();
 			List<String[]> errors = new ArrayList<String[]>();
-				String tomcatHome = System.getProperty("tomcat_home", "");
+				String tomcatHome = System.getProperty("tomcat6_home", "");
 				try {
 					
 					/* final Map<String, String> cleanupPreferences = new HashMap<String, String>( JavaPlugin
@@ -95,24 +95,24 @@ public class ConfigureEclipse implements IStartup {
 					// defino variable tomcat home
 					if (!isValidTomcatHomeVariable()) {
 						if (isValidTomcatHome(tomcatHome)) {
-							JavaCore.setClasspathVariable("TOMCAT_HOME", new Path(tomcatHome), monitor);
+							JavaCore.setClasspathVariable("TOMCAT6_HOME", new Path(tomcatHome), monitor);
 							isTomcatHomeValid = true;
 						} else {
 							if (ltoCompliant < LTO_ERROR) {
 								ltoCompliant = LTO_ERROR;
 							}
-							errors.add(new String[] {"La variable TOMCAT_HOME es invalida", "Defina en el eclipse.ini -Dtomcat_home=XXX"});
+							errors.add(new String[] {"La variable TOMCAT6_HOME es invalida", "Defina en el eclipse.ini -Dtomcat6_home=XXX"});
 						}
 					}else {
 						isTomcatHomeValid = true;
-						IPath tomcatHomeVar = JavaCore.getClasspathVariable("TOMCAT_HOME");
+						IPath tomcatHomeVar = JavaCore.getClasspathVariable("TOMCAT6_HOME");
 						tomcatHome = tomcatHomeVar.toString();
 					}
 					// defino el string subs tomcat home
 					if (isTomcatHomeValid) {
-						if (VariablesPlugin.getDefault().getStringVariableManager().getValueVariable("TOMCAT_HOME") == null) {
+						if (VariablesPlugin.getDefault().getStringVariableManager().getValueVariable("TOMCAT6_HOME") == null) {
 							ValueVariable arr[] = new ValueVariable[1];
-							arr[0] = new ValueVariable("TOMCAT_HOME","variable tomcat home de lto", false, tomcatHome);
+							arr[0] = new ValueVariable("TOMCAT6_HOME","variable tomcat home de lto", false, tomcatHome);
 							VariablesPlugin.getDefault().getStringVariableManager().addVariables(arr);
 						}
 					}
@@ -148,7 +148,7 @@ private boolean isValidPdLocation(String pdLocationFile) {
 }
 
 private boolean isValidTomcatHomeVariable() {
-	IPath tomcatHome = JavaCore.getClasspathVariable("TOMCAT_HOME");
+	IPath tomcatHome = JavaCore.getClasspathVariable("TOMCAT6_HOME");
 	if (tomcatHome == null) {
 		return false;
 	}
