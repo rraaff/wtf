@@ -114,13 +114,10 @@ public class LaunchTomcat extends ActionDelegate implements IWorkbenchWindowActi
 		}
 		
 		
-		IPath p = project.getRawLocation().removeLastSegments(1);
-		file = p.toFile();
+		file = project.getFolder("src").getRawLocation().toFile().getParentFile();
 		String appBase = file.toString();
 		
-		IPath projectLoc = project.getRawLocation();
-		File projectLocfile = projectLoc.toFile();
-		String docBase = projectLocfile.toString();
+		String docBase = file.toString();
 		
 		String docbase =docBase + "/src/main/webapp";
 		String workdir =docBase + "/src/main/webapp/work";
