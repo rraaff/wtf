@@ -136,6 +136,20 @@
          </toolbar> 
         </menuContribution>
    </extension>
+   
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="WTFPlugin"
+            name="WTF"/>
+      <view
+            allowMultiple="false"
+            category="WTFPlugin"
+            class="wtfplugin.views.WTFLaunchView"
+            icon="icons/16_tomcat.gif"
+            id="WTFPlugin.views.quicklaunch"
+            name="SQL Outline"/>
+   </extension>
  
       <!--extension
        point="org.eclipse.debug.core.launchDelegates">

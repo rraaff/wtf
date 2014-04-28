@@ -126,41 +126,6 @@ public class WTFStatusBar extends WorkbenchWindowControlContribution {
 		}
 	}
 	
-	public class LaunchTomcatMouseListener extends MouseAdapter {
-		private IProject project; 
-		
-		public LaunchTomcatMouseListener(IProject project) {
-			super();
-			this.project = project;
-		}
-		
-		@Override
-		public void mouseUp(MouseEvent e) {
-			InputStream is = null;
-			try {
-				IFile file = project.getFile(".wtf");
-				Properties props = new Properties();
-				is = file.getContents();
-				props.load(is);
-				LaunchTomcat.launchTomcat(project, props.getProperty("contextPath", "/" + project.getName()), props.getProperty("port", "8080"), props.getProperty("serverport", "8208"), props.getProperty("contextcontent",""), props.getProperty("jvmargs",""));
-			} catch (JavaModelException e1) {
-				Activator.showException(e1);
-			} catch (CoreException e1) {
-				Activator.showException(e1);
-			} catch (IOException e1) {
-				Activator.showException(e1);
-			} finally {
-				if (is!= null) {
-					try {
-						is.close();
-					} catch (IOException e1) {
-						Activator.showException(e1);
-					}
-				}
-			}
-		}
-		
-	}
 
 	public static void setMessage(MultiStatus info) {
 		// TODO Auto-generated method stub
