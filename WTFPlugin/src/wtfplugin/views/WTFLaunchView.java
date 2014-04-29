@@ -1,5 +1,11 @@
 package wtfplugin.views;
 
+import java.awt.GridBagLayout;
+import java.awt.Point;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -7,13 +13,17 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.part.ViewPart;
 
 import swing2swt.layout.FlowLayout;
 import wtfplugin.Activator;
+import wtfplugin.actions.LaunchTomcat;
 import wtfplugin.statusbar.LaunchTomcatMouseListener;
 
 
@@ -71,15 +81,35 @@ public class WTFLaunchView extends ViewPart {
 					if (pro.hasNature(JavaCore.NATURE_ID)) {
 						IFile file = pro.getFile(".wtf");
 						if (file != null && file.exists()) {
-								b = new Button(parent, SWT.NONE);
-								RowData gd_btnVersionComercial = new RowData();
-								gd_btnVersionComercial.height = 24;
-								b.setLayoutData(gd_btnVersionComercial);
-								b.setText(pro.getName());
+								b = new Button(parent, SWT.NONE | SWT.DEFAULT);
+//								RowData gd_btnVersionComercial = new RowData();
+//								gd_btnVersionComercial.height = 50;
+//								gd_btnVersionComercial.width= 250;
+//								b.setLayoutData(gd_btnVersionComercial);
+								b.setText("\n   " + pro.getName() + "   \n");
+								InputStream is = null;
+								try {
+										Properties props = new Properties();
+										is = file.getContents();
+										props.load(is);
+										if ("true".equals(props.getProperty("default", "false"))) {
+											b.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GREEN));
+										}
+								} finally {
+									if (is!= null) {
+										try {
+											is.close();
+										} catch (IOException e1) {
+											Activator.showException(e1);
+										}
+									}
+								}
+								
 								b.addMouseListener(new LaunchTomcatMouseListener(pro));
+								b.setSize(new org.eclipse.swt.graphics.Point(100, 300));
 							}
 						}
-				} catch (CoreException e1) {
+				} catch (Exception e1) {
 					Activator.showException(e1);
 				}
 			}

@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -18,6 +20,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -40,6 +43,7 @@ import wtfplugin.Activator;
 public class LaunchTomcat extends ActionDelegate implements IWorkbenchWindowActionDelegate {
 	
 	private static String serverxml = null; 
+	
 
 	public LaunchTomcat() {
 	}
@@ -48,10 +52,44 @@ public class LaunchTomcat extends ActionDelegate implements IWorkbenchWindowActi
 	 * @see ActionDelegate#run(IAction)
 	 */
 	public void run(IAction actionP) {
+		launchDefaultTomcat();
+	}
+
+	public void launchDefaultTomcat() {
 		try {
 			
 			IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 			IWorkbench workbench = PlatformUI.getWorkbench();
+			
+			IProject[] projects = root.getProjects();
+			for (IProject pro : projects) {
+				if (pro.isOpen()) {
+						if (pro.hasNature(JavaCore.NATURE_ID)) {
+							IFile file = pro.getFile(".wtf");
+							InputStream is = null;
+							try {
+								if (file != null && file.exists()) {
+										Properties props = new Properties();
+										is = file.getContents();
+										props.load(is);
+										if ("true".equals(props.getProperty("default", "true"))) {
+											LaunchTomcat.launchTomcat(pro, props.getProperty("contextPath", "/" + pro.getName()), props.getProperty("port", "8080"), props.getProperty("serverport", "8208"), props.getProperty("contextcontent",""), props.getProperty("jvmargs",""));
+											return;
+										}
+								}
+							} finally {
+								if (is!= null) {
+									try {
+										is.close();
+									} catch (IOException e1) {
+										Activator.showException(e1);
+									}
+								}
+							}
+						}
+					}
+			}
+			
 			String webappname = "/corporate";
 			IProject project = root.getProject("corporate");
 			File file = null;
@@ -65,15 +103,20 @@ public class LaunchTomcat extends ActionDelegate implements IWorkbenchWindowActi
 			}
 			String port ="8080";
 			String serverPort = "8208";
-			
 			launchTomcat(project, webappname, port, serverPort, "", "");
-			
 		} catch (Exception e) {
 			Activator.showException(e);
 		}
 	}
 
 	public static void launchTomcat(IProject project, String webappname, String port, String serverPort, String contextContent, String jvmArgs) throws CoreException, IOException, JavaModelException {
+		
+		IProcess process= DebugUITools.getCurrentProcess();
+		if (process != null && process.getLaunch().getLaunchConfiguration().getName().equals("Start Tomcat")) {
+			process.terminate();
+		}
+			
+		
 		File file;
 		ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
 		ILaunchConfigurationType type = manager.getLaunchConfigurationType(IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION);

@@ -1,0 +1,6 @@
+contextPath=/corporate
+port=8080
+serverport=8208
+contextcontent=
+jvmargs=
+default=true

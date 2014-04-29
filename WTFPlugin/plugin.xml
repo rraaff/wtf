@@ -29,7 +29,6 @@
                icon="icons/16_tomcat.gif"
                id="wtf.action.launchtomcat"
                label="Launch tomcat"
-               menubarPath="wtf.menu/launchactions"
                style="push"
                toolbarPath="window/additions"/>
       </actionSet>
@@ -148,8 +147,26 @@
             class="wtfplugin.views.WTFLaunchView"
             icon="icons/16_tomcat.gif"
             id="WTFPlugin.views.quicklaunch"
-            name="SQL Outline"/>
+            name="WTF Quick Launch"/>
    </extension>
+ 
+ <extension	point="org.eclipse.ui.bindings">
+		<key
+        commandId="wtf.action.launchtomcat"
+        schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+        contextId="org.eclipse.ui.contexts.window"
+        sequence="Shift+F8"/>
+	</extension>
+ 
+ <extension	point="org.eclipse.ui.commands">
+		<command
+        categoryId="org.eclipse.ui.category.file"
+        defaultHandler="wtfplugin.launch.LaunchTomcatHandler"
+        description="sqlplugin.toggle.description"
+        id="wtf.action.launchtomcat"
+        name="wtf.action.launchtomcat">
+		</command>
+	</extension>
  
       <!--extension
        point="org.eclipse.debug.core.launchDelegates">
