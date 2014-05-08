@@ -1,5 +1,6 @@
 package wtfplugin.builder;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -26,7 +27,7 @@ public class LanguageBundles {
 	}
 	public Map<String, String> getBundles() {
 		return bundles;
-	}
+	} 
 	public void setBundles(Map<String, String> bundles) {
 		this.bundles = bundles;
 	}
@@ -63,5 +64,19 @@ public class LanguageBundles {
 		result.addAll(this.bundles.keySet());
 		result.addAll(cb.getBundles().keySet());
 		return result;
+	}
+	public Collection<? extends String> getCountryPendingKeys(CountryBundles cb) {
+		Set<String> st = new HashSet<String>();
+		for (Map.Entry<String, String> entry : this.bundles.entrySet()) {
+				if (entry.getValue().startsWith("_/_")) {
+					st.add(entry.getKey());
+				}
+		}
+		for (Map.Entry<String, String> entry : cb.getBundles().entrySet()) {
+			if (entry.getValue().startsWith("_/_")) {
+				st.add(entry.getKey());
+			}
+	}
+		return st;
 	}
 }

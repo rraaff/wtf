@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/WTFFeature_1.0.7.jar" id="WTFFeature" version="1.0.7"/>
+   <feature url="features/WTFFeature_1.0.9.jar" id="WTFFeature" version="1.0.9"/>
 </site>

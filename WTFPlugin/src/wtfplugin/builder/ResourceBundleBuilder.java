@@ -183,6 +183,8 @@ public class ResourceBundleBuilder extends IncrementalProjectBuilder {
 				fullToCompare.addAll(fullKeys);
 				
 				fullToCompare.removeAll(countryKeys);
+				fullToCompare.addAll(lb.getCountryPendingKeys(cb));
+				
 				if (!fullToCompare.isEmpty()) {
 					final String PID = Activator.PLUGIN_ID;
 					final String lbF = lb.getLanguage();
