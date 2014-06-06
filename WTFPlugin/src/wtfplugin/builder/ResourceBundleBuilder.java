@@ -243,6 +243,7 @@ public class ResourceBundleBuilder extends IncrementalProjectBuilder {
 
 	public static Map<String, String> readFileLines(IFile file) throws Exception {
 		Map<String, String> result = new HashMap<String, String>();
+		Set<String> repeated = new HashSet<String>();
 		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(file.getContents(),"ISO-8859-1"));
 		String line;
 		try {
@@ -252,11 +253,33 @@ public class ResourceBundleBuilder extends IncrementalProjectBuilder {
 					String rb[] = line.split("=");
 					rb[0] = rb[0].trim();
 					if (rb.length == 1)  {
+						if (result.containsKey(rb[0])) {
+							repeated.add(rb[0]);
+						}
 						result.put(rb[0], "");
 					} else {
+						if (result.containsKey(rb[0])) {
+							repeated.add(rb[0]);
+						}
 						result.put(rb[0], rb[1]);
 					}
 				}
+			}
+			if (!repeated.isEmpty()) {
+				final String PID = Activator.PLUGIN_ID;
+				final String fileName = file.getName(); 
+				   final MultiStatus info = new MultiStatus(PID, 1, "Claves repetidas en el archivo" + fileName, null);
+				   for (String key : repeated) {
+						 info.add(new Status(IStatus.ERROR, PID, 1, key, null));
+					}
+				   final MultiStatus infoFinal = info;
+				   Display.getDefault().syncExec( new Runnable() {
+						public void run() {
+							// Aca setear en un label contribution al status bar el tipo de error, que on click lo vuelva a mostrar, con un icono de ok, error, fatal
+						   ErrorDialog.openError(Activator.getDefault().getWorkbench()
+									.getWorkbenchWindows()[0].getShell(), "Errores de rb para " + fileName, null, infoFinal);
+						}
+				  });
 			}
 		} finally {
 			bufferedReader.close();
