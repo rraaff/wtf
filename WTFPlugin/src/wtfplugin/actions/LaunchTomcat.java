@@ -191,15 +191,7 @@ public class LaunchTomcat extends ActionDelegate implements IWorkbenchWindowActi
 		classpath.add(projectOutputPath.getMemento());
 		
 //			classpath.add("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><runtimeClasspathEntry path=\"/home/mgodoy/gitorious/test_plugin/wtf/wtf-service-web/target/classes\" type=\"1\"/>");
-		IClasspathEntry[] entries = javaProject.getRawClasspath(); 
-		int index = 0;
-		for (IClasspathEntry classpathEntry : entries) {
-			if (classpathEntry.getEntryKind() != IClasspathEntry.CPE_SOURCE) {
-				if (classpathEntry.getEntryKind() != IClasspathEntry.CPE_CONTAINER) {
-					classpath.add(new RuntimeClasspathEntry(classpathEntry).getMemento());
-				}
-			}
-		}
+		addToClasspath(classpath, javaProject);
 		
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, classpath);
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, false);
@@ -211,6 +203,25 @@ public class LaunchTomcat extends ActionDelegate implements IWorkbenchWindowActi
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_WORKING_DIRECTORY, workingDir.getAbsolutePath());
 		ILaunchConfiguration configuration = workingCopy.doSave();
 		DebugUITools.launch(configuration, ILaunchManager.DEBUG_MODE);
+	}
+
+	public static void addToClasspath( List classpath, IJavaProject javaProject) throws JavaModelException, CoreException {
+		IClasspathEntry[] entries = javaProject.getRawClasspath(); 
+		int index = 0;
+		for (IClasspathEntry classpathEntry : entries) {
+			if (classpathEntry.getEntryKind() != IClasspathEntry.CPE_SOURCE) {
+				if (classpathEntry.getEntryKind() != IClasspathEntry.CPE_CONTAINER) {
+					if (classpathEntry.getEntryKind() == IClasspathEntry.CPE_PROJECT) {
+						IPath path = classpathEntry.getPath();
+						String projectName = path.lastSegment();
+						IProject refProject = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+						IJavaProject refProjectJava = JavaCore.create(refProject);
+						addToClasspath(classpath, refProjectJava);
+					}
+					classpath.add(new RuntimeClasspathEntry(classpathEntry).getMemento());
+				}
+			}
+		}
 	}
 
 	public static void addTomcatJarToClasspath(List classpath, String jar) throws CoreException {

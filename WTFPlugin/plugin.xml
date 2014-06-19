@@ -115,6 +115,25 @@
          </action>
       </objectContribution>
       
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IResource"
+            nameFilter="*"
+            id="wtfplugin.actions.runScript">
+         <action
+               class="wtfplugin.actions.ExecuteScriptsFromSelection"
+               icon="icons/sql.gif"
+               id="wtfplugin.actions.runScript"
+               label="Ejecuta los scripts contra la base"
+               menubarPath="com.despegar/group1"
+               style="push">
+            <enablement>
+               <and>
+                  <objectClass name="org.eclipse.core.internal.resources.File"/>
+               </and>
+            </enablement>
+         </action>
+      </objectContribution>
+      
       </extension>
       
       <extension
