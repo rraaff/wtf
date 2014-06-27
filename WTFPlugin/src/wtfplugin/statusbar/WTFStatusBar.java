@@ -1,10 +1,6 @@
 package wtfplugin.statusbar;
 
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -12,12 +8,8 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
-import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
@@ -26,12 +18,14 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.menus.WorkbenchWindowControlContribution;
 
 import wtfplugin.Activator;
-import wtfplugin.actions.LaunchTomcat;
+
+import com.swtdesigner.ResourceManager;
 
 public class WTFStatusBar extends WorkbenchWindowControlContribution {
 
 	private static WTFStatusBar instance;
 	private CLabel label;
+	private static Integer rb_check;
 	private static MultiStatus error;
 	private Composite comp;
 
@@ -43,7 +37,22 @@ public class WTFStatusBar extends WorkbenchWindowControlContribution {
 		super(id);
 		instance = this;
 	}
-	
+
+	private static void setImage() {
+		if (rb_check==null) {
+			instance.label.setImage(ResourceManager.getPluginImage("WTFPlugin", "icons/circle_gray_16.png"));
+			return;
+		}
+		if (rb_check==0) {
+			instance.label.setImage(ResourceManager.getPluginImage("WTFPlugin", "icons/circle_green_16.png"));
+		}
+		if (rb_check==1) {
+			instance.label.setImage(ResourceManager.getPluginImage("WTFPlugin", "icons/circle_yellow_16.png"));
+		}
+		if (rb_check==2) {
+			instance.label.setImage(ResourceManager.getPluginImage("WTFPlugin", "icons/circle_red_16.png"));
+		}
+	}
 
 	@Override
 	protected Control createControl(Composite parent) {
@@ -61,6 +70,10 @@ public class WTFStatusBar extends WorkbenchWindowControlContribution {
 		
 		comp.setLayout(rowLayout);
 
+		label = new CLabel(comp, SWT.CENTER);
+		label.setVisible(true);
+		setImage();
+		label.setText("RB");
 		
 		refresh();
 		
@@ -91,6 +104,15 @@ public class WTFStatusBar extends WorkbenchWindowControlContribution {
 			}
 		});*/
 		return comp;
+	}
+	
+	public static void setRBCheck(Integer value) {
+		rb_check = value;
+		if (instance != null) {
+			if (instance.label != null) {
+				setImage();
+			}
+		}
 	}
 
 	public void refresh() {

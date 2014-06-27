@@ -23,6 +23,12 @@
                maxThreads="150" minSpareThreads="1" maxSpareThreads="10"
                enableLookups="false" redirectPort="8443" acceptCount="100"
                connectionTimeout="20000" disableUploadTimeout="true" maxPostSize="0"/>
+               
+    <Connector 
+           port="@httpsport@" maxThreads="200"
+           scheme="https" secure="true" SSLEnabled="true"
+           keystoreFile="${user.home}/.keystoreWTF" keystorePass="changeit"
+           clientAuth="false" sslProtocol="TLS"/>
 
     <Engine name="Catalina" defaultHost="localhost">
 

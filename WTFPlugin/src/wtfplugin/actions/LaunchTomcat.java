@@ -43,6 +43,7 @@ import wtfplugin.Activator;
 public class LaunchTomcat extends ActionDelegate implements IWorkbenchWindowActionDelegate {
 	
 	private static String serverxml = null; 
+	private static byte keystore[];
 	
 
 	public LaunchTomcat() {
@@ -73,7 +74,7 @@ public class LaunchTomcat extends ActionDelegate implements IWorkbenchWindowActi
 										is = file.getContents();
 										props.load(is);
 										if ("true".equals(props.getProperty("default", "true"))) {
-											LaunchTomcat.launchTomcat(pro, props.getProperty("contextPath", "/" + pro.getName()), props.getProperty("port", "8080"), props.getProperty("serverport", "8208"), props.getProperty("contextcontent",""), props.getProperty("jvmargs",""));
+											LaunchTomcat.launchTomcat(pro, props.getProperty("contextPath", "/" + pro.getName()), props.getProperty("port", "8080"), props.getProperty("httpsPort", "8443"),props.getProperty("serverport", "8208"), props.getProperty("contextcontent",""), props.getProperty("jvmargs",""));
 											return;
 										}
 								}
@@ -102,14 +103,15 @@ public class LaunchTomcat extends ActionDelegate implements IWorkbenchWindowActi
 				webappname = "/marcablanca";
 			}
 			String port ="8080";
+			String httpsPort ="8443";
 			String serverPort = "8208";
-			launchTomcat(project, webappname, port, serverPort, "", "");
+			launchTomcat(project, webappname, port, httpsPort, serverPort, "", "");
 		} catch (Exception e) {
 			Activator.showException(e);
 		}
 	}
 
-	public static void launchTomcat(IProject project, String webappname, String port, String serverPort, String contextContent, String jvmArgs) throws CoreException, IOException, JavaModelException {
+	public static void launchTomcat(IProject project, String webappname, String port, String httpsPort, String serverPort, String contextContent, String jvmArgs) throws CoreException, IOException, JavaModelException {
 		
 		IProcess process= DebugUITools.getCurrentProcess();
 		if (process != null && process.getLaunch().getLaunchConfiguration().getName().equals("Start Tomcat")) {
@@ -165,9 +167,18 @@ public class LaunchTomcat extends ActionDelegate implements IWorkbenchWindowActi
 		String docbase =docBase + "/src/main/webapp";
 		String workdir =docBase + "/src/main/webapp/work";
 		
+		// Borro el keystore viejo
+		org.apache.commons.io.FileUtils.deleteQuietly(new File(System.getProperty("user.home") + "/.keystoreWTF"));
+		if (keystore == null) {
+			InputStream is = LaunchTomcat.class.getResourceAsStream("keystoreWTF");
+			keystore = IOUtils.toByteArray(is);
+			is.close();
+		}
+		File keystoreFile = new File(System.getProperty("user.home") + "/.keystoreWTF");
+		org.apache.commons.io.FileUtils.writeByteArrayToFile(keystoreFile, keystore);
+		
 		// Primero escribo el server xml
 		org.apache.commons.io.FileUtils.deleteQuietly(new File(System.getProperty("java.io.tmpdir") + "/temp_server.xml"));
-		serverxml = null;
 		if (serverxml == null) {
 			InputStream is = LaunchTomcat.class.getResourceAsStream("server.xml");
 			String tempServer = IOUtils.toString(is);
@@ -178,6 +189,7 @@ public class LaunchTomcat extends ActionDelegate implements IWorkbenchWindowActi
 		newTempServer = newTempServer.replace("@appbase@", appBase);
 		newTempServer = newTempServer.replace("@serverport@", serverPort);
 		newTempServer = newTempServer.replace("@httpport@", port);
+		newTempServer = newTempServer.replace("@httpsport@", httpsPort);
 		newTempServer = newTempServer.replace("@docbase@", docbase);
 		newTempServer = newTempServer.replace("@workdir@", workdir);
 		newTempServer = newTempServer.replace("@contextcontent@", contextContent);

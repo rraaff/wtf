@@ -1,15 +1,20 @@
 package wtfplugin.builder;
 
 import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import wtfplugin.Activator;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -42,6 +47,7 @@ public class ResourceBundleBuilder extends IncrementalProjectBuilder {
 
 	// este hash va a tener una entrada por archivo con todos los resource del
 	// archivo
+	private static Set<String> usedResourceBundles = new HashSet<String>();
 	private static Map<String, LanguageBundles> resourceBundles = new HashMap<String, LanguageBundles>();
 	private boolean propertiesModified = false;
 
@@ -95,7 +101,16 @@ public class ResourceBundleBuilder extends IncrementalProjectBuilder {
 	void checkFile(IResource resource, int resourceDelta) {
 		if (resource instanceof IFile) {
 			IFile file = (IFile)resource;
-			if (!isTarget(file)) {			
+			if (!isTarget(file)) {
+				if (file.getName().endsWith(".java")) {
+					extractRBsFromJava(file);
+				} 
+				if (file.getName().endsWith(".js")) {
+					extractRBsFromJS(file);
+				} 
+				if (file.getName().endsWith(".ftl")) {
+					extractRBsFromFTL(file);
+				} 
 				if (file.getParent().getName().equals("locale")) {
 					if (file.getName().startsWith("messages")) {
 						try {
@@ -120,6 +135,111 @@ public class ResourceBundleBuilder extends IncrementalProjectBuilder {
 		return null;
 	}*/
 	
+	private void extractRBsFromJava(IFile file) {
+		InputStream inputStream = null;
+		try {
+			inputStream = file.getContents();
+			String fileContent = IOUtils.toString(inputStream);
+			Pattern pattern = Pattern.compile("getMessage\\s*\\(\\s*\\\"([^\"]*)\"");
+			Matcher matcher = pattern.matcher(fileContent);
+			while (matcher.find()) {
+				usedResourceBundles.add(matcher.group(1));
+			}
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally{
+			if (inputStream != null) {
+				closeSilent(inputStream);
+			}
+		}
+	}
+	private void closeSilent(InputStream inputStream) {
+		try {
+			inputStream.close();
+		} catch (Exception e) {
+		}
+		
+	}
+
+	private void extractRBsFromJS(IFile file) {
+		InputStream inputStream = null;
+		try {
+			inputStream = file.getContents();
+			String fileContent = IOUtils.toString(inputStream);
+			Pattern pattern = Pattern.compile("getI18nMessage\\s*\\(\\s*\\\"([^\"]*)\"");
+			Matcher matcher = pattern.matcher(fileContent);
+			while (matcher.find()) {
+				usedResourceBundles.add(matcher.group(1));
+			}
+			pattern = Pattern.compile("getI18nMessage\\s*\\(\\s*'([^\']*)'");
+			matcher = pattern.matcher(fileContent);
+			while (matcher.find()) {
+				usedResourceBundles.add(matcher.group(1));
+			}
+			
+			pattern = Pattern.compile("translate\\s*\\(\\s*\\\"([^\"]*)\"");
+			matcher = pattern.matcher(fileContent);
+			while (matcher.find()) {
+				usedResourceBundles.add(matcher.group(1));
+			}
+			
+			pattern = Pattern.compile("translate\\s*\\(\\s*'([^\']*)'");
+			matcher = pattern.matcher(fileContent);
+			while (matcher.find()) {
+				usedResourceBundles.add(matcher.group(1));
+			}
+			
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally{
+			if (inputStream != null) {
+				closeSilent(inputStream);
+			}
+		}
+	}
+	private void extractRBsFromFTL(IFile file) {
+		InputStream inputStream = null;
+		try {
+			inputStream = file.getContents();
+			String fileContent = IOUtils.toString(inputStream);
+			Pattern pattern = Pattern.compile("message\\s+'([^']*)'");
+			Matcher matcher = pattern.matcher(fileContent);
+			while (matcher.find()) {
+				usedResourceBundles.add(matcher.group(1));
+			}
+			pattern = Pattern.compile("message\\s+\\\"([^\\\"]*)\\\"");
+			matcher = pattern.matcher(fileContent);
+			while (matcher.find()) {
+				usedResourceBundles.add(matcher.group(1));
+			}
+			
+			pattern = Pattern.compile("'([^']*)'\\s*\\|\\s*translate");
+			matcher = pattern.matcher(fileContent);
+			while (matcher.find()) {
+				usedResourceBundles.add(matcher.group(1));
+			}
+			
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally{
+			if (inputStream != null) {
+				closeSilent(inputStream);
+			}
+		}
+	}
+
 	private boolean isTarget(IFile file) {
 		for (String s : file.getFullPath().segments()) {
 			if (s.equals("target")) {
@@ -133,6 +253,7 @@ public class ResourceBundleBuilder extends IncrementalProjectBuilder {
 	protected IProject[] build(int kind, Map args, IProgressMonitor monitor) throws CoreException {
 		try {
 			if (kind == FULL_BUILD) {
+				usedResourceBundles = new HashSet<String>();
 				resourceBundles.clear();
 				getProject().accept(new SampleResourceVisitor(monitor));
 				performChecks();
@@ -202,6 +323,44 @@ public class ResourceBundleBuilder extends IncrementalProjectBuilder {
 							}
 					  });
 				}
+			}
+		}
+		// comparo full keys con lo que encontre, esto me da los que tengo de mas
+		Set<String> fullToUsed = new HashSet<String>();
+		for (String st : fullKeys) {
+			if (!st.endsWith("_validator")) {
+				if (!st.startsWith("TAXES.")) {
+					if (!st.startsWith("countries.")) {
+						if (!st.startsWith("corporate.taxCondition")) {
+							if (!st.startsWith("dynamic")) {
+								fullToUsed.add(st);
+							}
+						}
+					}
+				}
+			}
+		}
+		fullToUsed.removeAll(usedResourceBundles);
+		if (!fullToUsed.isEmpty()) {
+			System.out.println("************");
+			System.out.println("Posiblemente de mas");
+			for (String s : fullToUsed) {
+				System.out.println(s);
+			}
+		}
+		// comparo lo que encontre con lo existente, esto me da los que me faltan
+		Set<String> usedToFull= new HashSet<String>();
+		for (String st : usedResourceBundles) {
+			if (!st.contains("${")) {
+				usedToFull.add(st);
+			}
+		}
+		usedToFull.removeAll(fullKeys);
+		if (!usedToFull.isEmpty()) {
+			System.out.println("************");
+			System.out.println("Posiblemente faltantes");
+			for (String s : usedToFull) {
+				System.out.println(s);
 			}
 		}
 		/*

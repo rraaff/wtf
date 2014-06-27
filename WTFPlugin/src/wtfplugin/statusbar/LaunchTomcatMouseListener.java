@@ -30,7 +30,7 @@ public class LaunchTomcatMouseListener extends MouseAdapter {
 			Properties props = new Properties();
 			is = file.getContents();
 			props.load(is);
-			LaunchTomcat.launchTomcat(project, props.getProperty("contextPath", "/" + project.getName()), props.getProperty("port", "8080"), props.getProperty("serverport", "8208"), props.getProperty("contextcontent",""), props.getProperty("jvmargs",""));
+			LaunchTomcat.launchTomcat(project, props.getProperty("contextPath", "/" + project.getName()), props.getProperty("port", "8080"), props.getProperty("httpsPort", "8443"), props.getProperty("serverport", "8208"), props.getProperty("contextcontent",""), props.getProperty("jvmargs",""));
 		} catch (JavaModelException e1) {
 			Activator.showException(e1);
 		} catch (CoreException e1) {
