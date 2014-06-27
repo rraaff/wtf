@@ -10,6 +10,8 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
@@ -18,10 +20,15 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.menus.WorkbenchWindowControlContribution;
 
 import wtfplugin.Activator;
+import wtfplugin.builder.ResourceBundleBuilder;
 
 import com.swtdesigner.ResourceManager;
 
 public class WTFStatusBar extends WorkbenchWindowControlContribution {
+	
+	public static int RB_ERROR = 2;
+	public static int RB_WARNING = 1;
+	public static int RB_OK = 0;
 
 	private static WTFStatusBar instance;
 	private CLabel label;
@@ -74,6 +81,14 @@ public class WTFStatusBar extends WorkbenchWindowControlContribution {
 		label.setVisible(true);
 		setImage();
 		label.setText("RB");
+		
+		label.addMouseListener(new MouseListener() {
+			public void mouseUp(MouseEvent e) {
+				ResourceBundleBuilder.showSuspectedErrors();
+			}
+			public void mouseDoubleClick(MouseEvent e) {}
+			public void mouseDown(MouseEvent e) {}
+		});
 		
 		refresh();
 		

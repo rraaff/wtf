@@ -12,8 +12,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import wtfplugin.Activator;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.resources.IFile;
@@ -32,6 +30,9 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.swt.widgets.Display;
 
+import wtfplugin.Activator;
+import wtfplugin.statusbar.WTFStatusBar;
+
 
 /*
  *  Este builder no posee ui de agregado, se debe modificar el .project en forma manual agregando:
@@ -49,6 +50,10 @@ public class ResourceBundleBuilder extends IncrementalProjectBuilder {
 	// archivo
 	private static Set<String> usedResourceBundles = new HashSet<String>();
 	private static Map<String, LanguageBundles> resourceBundles = new HashMap<String, LanguageBundles>();
+	
+	private static Set<String> suspectedMisssing = new HashSet<String>();
+	private static Set<String> suspectedExtras = new HashSet<String>();
+	
 	private boolean propertiesModified = false;
 
 	class SampleDeltaVisitor implements IResourceDeltaVisitor {
@@ -341,13 +346,8 @@ public class ResourceBundleBuilder extends IncrementalProjectBuilder {
 			}
 		}
 		fullToUsed.removeAll(usedResourceBundles);
-		if (!fullToUsed.isEmpty()) {
-			System.out.println("************");
-			System.out.println("Posiblemente de mas");
-			for (String s : fullToUsed) {
-				System.out.println(s);
-			}
-		}
+		suspectedExtras = fullToUsed;
+		
 		// comparo lo que encontre con lo existente, esto me da los que me faltan
 		Set<String> usedToFull= new HashSet<String>();
 		for (String st : usedResourceBundles) {
@@ -356,12 +356,23 @@ public class ResourceBundleBuilder extends IncrementalProjectBuilder {
 			}
 		}
 		usedToFull.removeAll(fullKeys);
-		if (!usedToFull.isEmpty()) {
-			System.out.println("************");
-			System.out.println("Posiblemente faltantes");
-			for (String s : usedToFull) {
-				System.out.println(s);
-			}
+		suspectedMisssing = usedToFull;
+		
+		if (!suspectedExtras.isEmpty()) {
+			 Display.getDefault().syncExec( new Runnable() {
+				public void run() {
+					// Aca setear en un label contribution al status bar el tipo de error, que on click lo vuelva a mostrar, con un icono de ok, error, fatal
+				   WTFStatusBar.setRBCheck(WTFStatusBar.RB_WARNING);
+				}
+			});
+		}
+		if (!suspectedMisssing.isEmpty()) {
+			Display.getDefault().syncExec( new Runnable() {
+				public void run() {
+					// Aca setear en un label contribution al status bar el tipo de error, que on click lo vuelva a mostrar, con un icono de ok, error, fatal
+				   WTFStatusBar.setRBCheck(WTFStatusBar.RB_ERROR);
+				}
+			});
 		}
 		/*
 		LanguageBundles lang = resourceBundles.get("es");
@@ -398,6 +409,39 @@ public class ResourceBundleBuilder extends IncrementalProjectBuilder {
 			  });
 		}
 		System.out.println(errors);*/
+	}
+	
+	public static void showSuspectedErrors() {
+		if (!suspectedMisssing.isEmpty()) {
+			final String PID = Activator.PLUGIN_ID;
+			   final MultiStatus info = new MultiStatus(PID, 1, "Lo siguientes rb posiblemente falten", null);
+			   for (String key : suspectedMisssing) {
+					 info.add(new Status(IStatus.ERROR, PID, 1, key, null));
+				}
+			   final MultiStatus infoFinal = info;
+			   Display.getDefault().syncExec( new Runnable() {
+					public void run() {
+						// Aca setear en un label contribution al status bar el tipo de error, que on click lo vuelva a mostrar, con un icono de ok, error, fatal
+					   ErrorDialog.openError(Activator.getDefault().getWorkbench()
+								.getWorkbenchWindows()[0].getShell(), "Lo siguientes rb posiblemente falten", null, infoFinal);
+					}
+			  });
+		}
+		if (!suspectedExtras.isEmpty()) {
+			final String PID = Activator.PLUGIN_ID;
+			   final MultiStatus info = new MultiStatus(PID, 1, "Lo siguientes rb posiblemente sobren", null);
+			   for (String key : suspectedExtras) {
+					 info.add(new Status(IStatus.ERROR, PID, 1, key, null));
+				}
+			   final MultiStatus infoFinal = info;
+			   Display.getDefault().syncExec( new Runnable() {
+					public void run() {
+						// Aca setear en un label contribution al status bar el tipo de error, que on click lo vuelva a mostrar, con un icono de ok, error, fatal
+					   ErrorDialog.openError(Activator.getDefault().getWorkbench()
+								.getWorkbenchWindows()[0].getShell(), "Lo siguientes rb posiblemente sobren", null, infoFinal);
+					}
+			  });
+		}
 	}
 
 	public static Map<String, String> readFileLines(IFile file) throws Exception {
