@@ -10,6 +10,15 @@
        <run class="wtfplugin.builder.ResourceBundleBuilder"/>
     </builder>
  </extension>
+ 
+ <extension
+       id="classpathVerifier"
+       name="Builder para el uso de clases persistentes"
+       point="org.eclipse.core.resources.builders">
+    <builder hasNature="false">
+       <run class="wtfplugin.builder.classpath.ClasspathVerifier"/>
+    </builder>
+ </extension>
 
    <extension
          point="org.eclipse.ui.actionSets">
@@ -199,6 +208,13 @@
     </launchDelegate>
    </extension-->
    
+   <extension
+         id="invalidPersistentClassUse"
+         name="WTFPlugin.invalidPersistentClassUse"
+         point="org.eclipse.core.resources.markers">
+      <persistent value="true"/>
+      <super type="org.eclipse.core.resources.problemmarker"/>
+   </extension>
    
 
 </plugin>

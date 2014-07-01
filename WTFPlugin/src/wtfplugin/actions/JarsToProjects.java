@@ -39,6 +39,15 @@ public class JarsToProjects extends ActionDelegate implements IWorkbenchWindowAc
 		}
 		return false;
 	}
+	
+	private boolean hasImportVerifier(ICommand[] builders) {
+		for (ICommand command : builders) {
+			if (command.getBuilderName().equals("WTFPlugin.classpathVerifier")) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * @see ActionDelegate#run(IAction)
@@ -61,6 +70,18 @@ public class JarsToProjects extends ActionDelegate implements IWorkbenchWindowAc
 							ICommand buildCommand = desc.newCommand();
 							//buildCommand.setBuilder(new ClasspathVerifier());
 							buildCommand.setBuilderName("WTFPlugin.rbBuilder");
+							newbuilders[newbuilders.length - 1] = buildCommand;
+							desc.setBuildSpec(newbuilders);
+							pro.setDescription(desc, null);
+							builders = pro.getDescription().getBuildSpec();
+						}
+						if (pro.hasNature(JavaCore.NATURE_ID) && !hasImportVerifier(builders)) {
+							ICommand newbuilders[] = new ICommand[builders.length + 1];
+							System.arraycopy(builders, 0, newbuilders, 0, builders.length);
+							IProjectDescription desc =pro.getDescription(); 
+							ICommand buildCommand = desc.newCommand();
+							//buildCommand.setBuilder(new ClasspathVerifier());
+							buildCommand.setBuilderName("WTFPlugin.classpathVerifier");
 							newbuilders[newbuilders.length - 1] = buildCommand;
 							desc.setBuildSpec(newbuilders);
 							pro.setDescription(desc, null);
