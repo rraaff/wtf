@@ -49,6 +49,12 @@ public class ClasspathImportVerifier {
 				if (packageName.endsWith(".dao")) {
 					return;
 				}
+				if (packageName.endsWith(".test")) {
+					return;
+				}
+				if (packageName.contains(".test.")) {
+					return;
+				}
 				if (packageName.endsWith(".dao.impl")) {
 					return;
 				}

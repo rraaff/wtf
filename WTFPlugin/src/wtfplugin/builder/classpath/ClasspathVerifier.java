@@ -58,13 +58,11 @@ public class ClasspathVerifier extends IncrementalProjectBuilder {
 				IResource resource = delta.getResource();
 				switch (delta.getKind()) {
 				case IResourceDelta.ADDED:
-					resource.deleteMarkers(ClasspathVerifier.INVALID_MODEL_USE, false, IResource.DEPTH_INFINITE);
 					checkClass(resource.getProject(), resource, delta.getKind());
 					break;
 				case IResourceDelta.REMOVED:
 					break;
 				case IResourceDelta.CHANGED:
-					resource.deleteMarkers(ClasspathVerifier.INVALID_MODEL_USE, false, IResource.DEPTH_INFINITE);
 					checkClass(resource.getProject(), resource,delta.getKind());
 					break;
 				}
@@ -78,6 +76,7 @@ public class ClasspathVerifier extends IncrementalProjectBuilder {
 
 	private void checkClass(IProject project, IResource resource, int kind) throws JavaModelException, CoreException, Exception {
 		if (resource.getName().endsWith(".java")) {
+			resource.deleteMarkers(ClasspathVerifier.INVALID_MODEL_USE, false, IResource.DEPTH_INFINITE);
 			IJavaElement javaElement = JavaCore.create(resource);
 			ClasspathImportVerifier.checkCompilationUnitImports(project, (ICompilationUnit)javaElement);
 		}
