@@ -338,7 +338,9 @@ public class ResourceBundleBuilder extends IncrementalProjectBuilder {
 					if (!st.startsWith("countries.")) {
 						if (!st.startsWith("corporate.taxCondition")) {
 							if (!st.startsWith("dynamic")) {
-								fullToUsed.add(st);
+								if (!st.contains(".dyn")) {
+									fullToUsed.add(st);
+								}
 							}
 						}
 					}
