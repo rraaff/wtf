@@ -1,23 +1,7 @@
 package wtfplugin.actions;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
-import wtfplugin.Activator;
-import wtfplugin.Configuration;
-
-import org.eclipse.core.resources.ICommand;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.swt.widgets.Shell;
@@ -28,10 +12,13 @@ import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionDelegate;
 
+import wtfplugin.Activator;
+import wtfplugin.Configuration;
 
-public class CommandToDB extends ActionDelegate implements IWorkbenchWindowActionDelegate {
 
-	public CommandToDB() {
+public class CheckActualDBVersion extends ActionDelegate implements IWorkbenchWindowActionDelegate {
+
+	public CheckActualDBVersion() {
 	}
 	
 
@@ -46,8 +33,13 @@ public class CommandToDB extends ActionDelegate implements IWorkbenchWindowActio
 		if (manual == 0) {
 			String value = inputDialog.getValue();
 			try {
-				String[] command = { "xterm", "-e", "mysql", "-u"+Configuration.DBUSER, "-p"+Configuration.DBPASSWORD, "-h"+Configuration.DATABASE, value };
-				Runtime.getRuntime().exec(command);
+				String[] cmds = { "/bin/sh", "-c", "mysql "+value+  " -h"+Configuration.DATABASE+" -u"+Configuration.DBUSER+" -p"+Configuration.DBPASSWORD+" -e\"select * from dbversion where id = (select max(id) from dbversion);\"" };
+				new wtfplugin.console.ConsoleWriter().write("Version Actual");
+				ExecuteScriptsFromSelection.runAndLogToConsole(cmds);
+				
+				new wtfplugin.console.ConsoleWriter().write("Ultimos scripts");
+				String[] cmds1 = { "/bin/sh", "-c", "mysql "+value+  " -h"+Configuration.DATABASE+" -u"+Configuration.DBUSER+" -p"+Configuration.DBPASSWORD+" -e\"select * from dbscript where id_dbversion = (select max(id) from dbversion);\"" };
+				ExecuteScriptsFromSelection.runAndLogToConsole(cmds1);
 				
 				//Runtime.getRuntime().exec("/bin/bash -c mysql -uroot -proot -hlocalhost "/* + value*/);
 			} catch (IOException e) {

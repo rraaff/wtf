@@ -12,6 +12,14 @@
  </extension>
  
  <extension
+         point="org.eclipse.ui.console.consoleFactories">
+      <consoleFactory
+            class="wtfplugin.console.MysqlConsoleFactory"
+            icon="icons/jdbc_16.gif"
+            label="MYSQL console"/>
+   </extension>
+ 
+ <extension
        id="classpathVerifier"
        name="Builder para el uso de clases persistentes"
        point="org.eclipse.core.resources.builders">
@@ -37,6 +45,20 @@
                icon="icons/command-prompt.png"
                id="wtfplugin.actions.CommandToDB"
                label="Command contra la base"
+               style="push"
+               toolbarPath="window/additions"/>
+               
+            <action      class="wtfplugin.actions.RestoreDBFromRC"
+               icon="icons/data-backup-16.png"
+               id="wtfplugin.actions.RestoreDBFromRC"
+               label="Reestablece la base como la de RC"
+               style="push"
+               toolbarPath="window/additions"/>
+               
+            <action      class="wtfplugin.actions.CheckActualDBVersion"
+               icon="icons/database-check.gif"
+               id="wtfplugin.actions.CheckActualDBVersion"
+               label="Chequea la version actual"
                style="push"
                toolbarPath="window/additions"/>
 
