@@ -78,14 +78,14 @@ public class ConfigureEclipse implements IStartup {
 				        CleanUpOptions.TRUE);
 			    cleanupPreferences.put(org.eclipse.jdt.internal.corext.fix.CleanUpConstants.REMOVE_UNNECESSARY_CASTS,
 				        CleanUpOptions.TRUE);
-			    cleanupPreferences.put(org.eclipse.jdt.internal.corext.fix.CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES,
-				        CleanUpOptions.TRUE);
+//			    cleanupPreferences.put(org.eclipse.jdt.internal.corext.fix.CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES,
+//				        CleanUpOptions.TRUE);
 			    cleanupPreferences.put(org.eclipse.jdt.internal.corext.fix.CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS,
 				        CleanUpOptions.TRUE);
 			   // System.out.println(cleanupPreferences);
 			    
-			    cleanupPreferences.put(org.eclipse.jdt.internal.corext.fix.CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS,
-			        CleanUpOptions.TRUE);
+//			    cleanupPreferences.put(org.eclipse.jdt.internal.corext.fix.CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS,
+//			        CleanUpOptions.TRUE);
 			    
 			    new InstanceScope().getNode(JavaUI.ID_PLUGIN).putBoolean(PERFORM_SAVE_ACTIONS_PREFERENCE, true);
 			    org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil.saveSaveParticipantOptions(new InstanceScope(),

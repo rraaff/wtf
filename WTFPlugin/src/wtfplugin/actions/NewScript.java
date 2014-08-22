@@ -64,13 +64,17 @@ public class NewScript extends ActionDelegate implements IWorkbenchWindowActionD
 				int manual = inputDialog.open();
 				if (manual == 0) {
 					String value = inputDialog.getValue();
-					IFolder folder = (IFolder)selection.getFirstElement();
-					try {
-						IFile file = folder.getFile(new Path(value));
-						file.create(new ByteArrayInputStream(NEW_SCRIPT.replace("SCRIPTNAME", value).getBytes()), true, new NullProgressMonitor());
-					} catch (CoreException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+					if (!value.endsWith(".sql")) {
+						Activator.showErrorMessage("Error de nombre", "El script debe terminar con .sql");
+					} else {
+						IFolder folder = (IFolder)selection.getFirstElement();
+						try {
+							IFile file = folder.getFile(new Path(value));
+							file.create(new ByteArrayInputStream(NEW_SCRIPT.replace("SCRIPTNAME", value).getBytes()), true, new NullProgressMonitor());
+						} catch (CoreException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 				}
 			}

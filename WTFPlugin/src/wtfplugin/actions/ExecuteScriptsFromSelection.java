@@ -10,8 +10,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.internal.resources.File;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -19,6 +21,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionDelegate;
+
+import wtfplugin.Activator;
 
 
 /**
@@ -49,20 +53,29 @@ public class ExecuteScriptsFromSelection extends ActionDelegate {
 	public void run(IAction action) {
 		super.run(action);
 		if (this.selection instanceof StructuredSelection) {
-			StructuredSelection selection = (StructuredSelection)this.selection;
-			if (!selection.isEmpty()) {
-				IWorkbench workbench = PlatformUI.getWorkbench();
-				Shell shell = workbench.getActiveWorkbenchWindow().getShell();
-				StringBuilder fileNames = new StringBuilder();
-				Iterator<Object> selected = selection.iterator();
-				List<String> onlyFileNames = new ArrayList<String>();
-				while (selected.hasNext()) {
-					File file = (File)selected.next();
-					fileNames.append(file.getRawLocation().toString());
-//					ejecutar y loguear a la consola
+			InputDialog inputDialog = new InputDialog(Activator.getDefault().getWorkbench().getWorkbenchWindows()[0].getShell(), "Ingreso el nombre de la base", "Ingreso el nombre de la base, por ejemplo, corp_mgodoy", "corp_" + System.getProperty("user.name"), null);
+			int manual = inputDialog.open();
+			if (manual == 0) {
+				String value = inputDialog.getValue();
+				if (!StringUtils.isEmpty(value)) {
+					StructuredSelection selection = (StructuredSelection)this.selection;
+					if (!selection.isEmpty()) {
+						IWorkbench workbench = PlatformUI.getWorkbench();
+						Shell shell = workbench.getActiveWorkbenchWindow().getShell();
+						StringBuilder fileNames = new StringBuilder();
+						Iterator<Object> selected = selection.iterator();
+						List<String> onlyFileNames = new ArrayList<String>();
+						while (selected.hasNext()) {
+							File file = (File)selected.next();
+							// Por cada uno lo ejecuto contra la base
+							
+							fileNames.append(file.getRawLocation().toString());
+		//					ejecutar y loguear a la consola
+						}
+						//TODO MD wizard.setClient(AbstractProyect.getDefaultScriptPrefix());
+					} 
 				}
-				//TODO MD wizard.setClient(AbstractProyect.getDefaultScriptPrefix());
-			} 
+			}
 		}
 	}
 

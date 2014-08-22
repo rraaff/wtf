@@ -56,7 +56,8 @@ public class ReleaseVersion extends ActionDelegate implements IWorkbenchWindowAc
 				IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 				IFolder folder = (IFolder) selection.getFirstElement();
 				try {
-					String  database = folder.getProject().getDescription().getName().contains("wtf") ? "corporate" : "cupones";
+					//String  database = folder.getProject().getDescription().getName().contains("wtf") ? "corporate" : "cupones";
+					String database = "corporate";
 					StringBuilder sb = new StringBuilder();
 					sb.append("use " + database + ";\n");
 					IResource resourcesArray[] = folder.members();

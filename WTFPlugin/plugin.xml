@@ -32,6 +32,13 @@
                label="Convertir relaciones a projectos"
                style="push"
                toolbarPath="window/additions"/>
+               
+            <action      class="wtfplugin.actions.CommandToDB"
+               icon="icons/command-prompt.png"
+               id="wtfplugin.actions.CommandToDB"
+               label="Command contra la base"
+               style="push"
+               toolbarPath="window/additions"/>
 
       <action
                class="wtfplugin.actions.LaunchTomcat"
