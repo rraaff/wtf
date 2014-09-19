@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
@@ -25,10 +26,24 @@ public class Activator extends AbstractUIPlugin {
 	// The shared instance
 	private static Activator plugin;
 	
+	public static String lastDB = null;
+	
 	/**
 	 * The constructor
 	 */
 	public Activator() {
+	}
+	
+	public static String getDBSchema() {
+		InputDialog inputDialog = new InputDialog(Activator.getDefault().getWorkbench().getWorkbenchWindows()[0].getShell(), "Ingreso el nombre de la base", "Ingreso el nombre de la base, por ejemplo, corp_mgodoy", (lastDB == null ? "corp_" + System.getProperty("user.name") : lastDB), null);
+		int manual = inputDialog.open();
+		if (manual == 0) {
+			String value = inputDialog.getValue();
+			lastDB = value;
+			return value;
+		} else {
+			return null;
+		}
 	}
 
 	/*

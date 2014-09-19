@@ -63,11 +63,8 @@ public class ExecuteScriptsFromSelection extends ActionDelegate {
 	public void run(IAction action) {
 		super.run(action);
 		if (this.selection instanceof StructuredSelection) {
-			InputDialog inputDialog = new InputDialog(Activator.getDefault().getWorkbench().getWorkbenchWindows()[0].getShell(),
-					"Ingreso el nombre de la base", "Ingreso el nombre de la base, por ejemplo, corp_mgodoy", "corp_" + System.getProperty("user.name"), null);
-			int manual = inputDialog.open();
-			if (manual == 0) {
-				String value = inputDialog.getValue();
+			String value = Activator.getDBSchema();
+			if (value != null) {
 				if (!StringUtils.isEmpty(value)) {
 					StructuredSelection selection = (StructuredSelection) this.selection;
 					if (!selection.isEmpty()) {

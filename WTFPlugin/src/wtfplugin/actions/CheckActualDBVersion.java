@@ -28,10 +28,8 @@ public class CheckActualDBVersion extends ActionDelegate implements IWorkbenchWi
 	public void run(IAction action) {
 		IWorkbench workbench = PlatformUI.getWorkbench();
 		Shell shell = workbench.getActiveWorkbenchWindow().getShell();
-		InputDialog inputDialog = new InputDialog(Activator.getDefault().getWorkbench().getWorkbenchWindows()[0].getShell(), "Ingreso el nombre de la base", "Ingreso el nombre de la base, por ejemplo, corp_mgodoy", "corp_" + System.getProperty("user.name"), null);
-		int manual = inputDialog.open();
-		if (manual == 0) {
-			String value = inputDialog.getValue();
+		String value = Activator.getDBSchema();
+		if (value != null) {
 			try {
 				String[] cmds = { "/bin/sh", "-c", "mysql "+value+  " -h"+Configuration.DATABASE+" -u"+Configuration.DBUSER+" -p"+Configuration.DBPASSWORD+" -e\"select * from dbversion where id = (select max(id) from dbversion);\"" };
 				new wtfplugin.console.ConsoleWriter().write("Version Actual");

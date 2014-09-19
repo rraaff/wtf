@@ -4,6 +4,10 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.swt.widgets.Shell;
@@ -31,35 +35,54 @@ public class RestoreDBFromRC extends ActionDelegate implements IWorkbenchWindowA
 	public void run(IAction action) {
 		IWorkbench workbench = PlatformUI.getWorkbench();
 		Shell shell = workbench.getActiveWorkbenchWindow().getShell();
-		InputDialog inputDialog = new InputDialog(Activator.getDefault().getWorkbench().getWorkbenchWindows()[0].getShell(), "Ingreso el nombre de la base a regenerar", "Ingreso el nombre de la base, por ejemplo, corp_mgodoy, la misma sera borrada y regenerada con la de RC", "corp_" + System.getProperty("user.name"), null);
-		int manual = inputDialog.open();
-		if (manual == 0) {
+		final String value = Activator.getDBSchema();
+		if (value != null) {
 			try {
-				String value = inputDialog.getValue();
-				String dumpName = System.getProperty("user.home") + "/bk_rc.sql";
-				// borro dump viejo
-				FileUtils.deleteQuietly(new File(dumpName));
-				// genero dump
-				String[] cmds = { "/bin/sh", "-c", "mysqldump corporate -h"+Configuration.RC_DATABASE+" -u"+Configuration.DBUSER+" -p"+Configuration.DBPASSWORD+" > \"" +dumpName+"\"" };
-				ExecuteScriptsFromSelection.runAndLogToConsole(cmds);
-				//dropeo database
-				String[] dropcmds = { "/bin/sh", "-c", "mysql -h"+Configuration.DATABASE+" -u"+Configuration.DBUSER+" -p"+Configuration.DBPASSWORD+" -e\"drop database "+value+"\"" };
-				ExecuteScriptsFromSelection.runAndLogToConsole(dropcmds);
-				// creo database
-				String[] createcmds = { "/bin/sh", "-c", "mysql -h"+Configuration.DATABASE+" -u"+Configuration.DBUSER+" -p"+Configuration.DBPASSWORD+" -e\"create database "+value+"\"" };
-				ExecuteScriptsFromSelection.runAndLogToConsole(createcmds);
-				// importo dump
-				String[] importcmds = { "/bin/sh", "-c", "mysql "+value+ " -h"+Configuration.DATABASE+" -u"+Configuration.DBUSER+" -p"+Configuration.DBPASSWORD+" -v < \"" +dumpName+"\"" };
-				ExecuteScriptsFromSelection.runAndLogToConsole(importcmds);
-				// creo database
-				String[] passwordscmds = { "/bin/sh", "-c", "mysql "+value+ " -h"+Configuration.DATABASE+" -u"+Configuration.DBUSER+" -p"+Configuration.DBPASSWORD+" -e\"update employee set password = '26ca23e9d7e861e00803bcf927e5ec03';commit;\"" };
-				ExecuteScriptsFromSelection.runAndLogToConsole(passwordscmds );
-				// alerta de posibilidad de tener que correr scripts
-				new ConsoleWriter().append("Base restaurada, verifique si debe correr scripts");
-			} catch (IOException e) {
-				Activator.showException(e);
-			}
-			
+				new wtfplugin.console.ConsoleWriter().write("Haciendo dump de base de datos de RC...");
+			} catch (IOException e1) {}
+			Job job = new Job("Restaurar base"){ //$NON-NLS-1$
+				protected IStatus run(IProgressMonitor monitor) {
+					try {
+						String dumpName = System.getProperty("user.home") + "/bk_rc.sql";
+						// borro dump viejo
+						FileUtils.deleteQuietly(new File(dumpName));
+						// genero dump
+						String[] cmds = { "/bin/sh", "-c", "mysqldump corporate -h"+Configuration.RC_DATABASE+" -u"+Configuration.DBUSER+" -p"+Configuration.DBPASSWORD+" > \"" +dumpName+"\"" };
+						ExecuteScriptsFromSelection.runAndLogToConsole(cmds);
+						//dropeo database
+						try {
+							new wtfplugin.console.ConsoleWriter().write("Dropeando base de datos de usuario...");
+						} catch (IOException e1) {}
+						String[] dropcmds = { "/bin/sh", "-c", "mysql -h"+Configuration.DATABASE+" -u"+Configuration.DBUSER+" -p"+Configuration.DBPASSWORD+" -e\"drop database "+value+"\"" };
+						ExecuteScriptsFromSelection.runAndLogToConsole(dropcmds);
+						// creo database
+						try {
+							new wtfplugin.console.ConsoleWriter().write("Creando base de datos de usuario...");
+						} catch (IOException e1) {}
+						String[] createcmds = { "/bin/sh", "-c", "mysql -h"+Configuration.DATABASE+" -u"+Configuration.DBUSER+" -p"+Configuration.DBPASSWORD+" -e\"create database "+value+"\"" };
+						ExecuteScriptsFromSelection.runAndLogToConsole(createcmds);
+						// importo dump
+						try {
+							new wtfplugin.console.ConsoleWriter().write("Importando dump de base de datos...");
+						} catch (IOException e1) {}
+						String[] importcmds = { "/bin/sh", "-c", "mysql "+value+ " -h"+Configuration.DATABASE+" -u"+Configuration.DBUSER+" -p"+Configuration.DBPASSWORD+" -v < \"" +dumpName+"\"" };
+						ExecuteScriptsFromSelection.runAndLogToConsole(importcmds);
+						// creo database
+						try {
+							new wtfplugin.console.ConsoleWriter().write("Cambiando passwords...");
+						} catch (IOException e1) {}
+						String[] passwordscmds = { "/bin/sh", "-c", "mysql "+value+ " -h"+Configuration.DATABASE+" -u"+Configuration.DBUSER+" -p"+Configuration.DBPASSWORD+" -e\"update employee set password = '26ca23e9d7e861e00803bcf927e5ec03';commit;\"" };
+						ExecuteScriptsFromSelection.runAndLogToConsole(passwordscmds );
+						// alerta de posibilidad de tener que correr scripts
+						new ConsoleWriter().append("Base restaurada, verifique si debe correr scripts");
+					} catch (IOException e) {
+						Activator.showException(e);
+					}
+					return Status.OK_STATUS;
+				
+				}}; 
+			//job.setSystem(true);
+			job.schedule();
 		}
 		
 	}

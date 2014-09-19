@@ -1,25 +1,8 @@
 package wtfplugin.actions;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
-import wtfplugin.Activator;
-import wtfplugin.Configuration;
-
-import org.eclipse.core.resources.ICommand;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbench;
@@ -27,6 +10,9 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionDelegate;
+
+import wtfplugin.Activator;
+import wtfplugin.Configuration;
 
 
 public class CommandToDB extends ActionDelegate implements IWorkbenchWindowActionDelegate {
@@ -41,12 +27,11 @@ public class CommandToDB extends ActionDelegate implements IWorkbenchWindowActio
 	public void run(IAction action) {
 		IWorkbench workbench = PlatformUI.getWorkbench();
 		Shell shell = workbench.getActiveWorkbenchWindow().getShell();
-		InputDialog inputDialog = new InputDialog(Activator.getDefault().getWorkbench().getWorkbenchWindows()[0].getShell(), "Ingreso el nombre de la base", "Ingreso el nombre de la base, por ejemplo, corp_mgodoy", "corp_" + System.getProperty("user.name"), null);
-		int manual = inputDialog.open();
-		if (manual == 0) {
-			String value = inputDialog.getValue();
+		String value = Activator.getDBSchema();
+		if (value != null) {
 			try {
-				String[] command = { "xterm", "-e", "mysql", "-u"+Configuration.DBUSER, "-p"+Configuration.DBPASSWORD, "-h"+Configuration.DATABASE, value };
+//				String[] command = { "xterm", "-e", "mysql", "-u"+Configuration.DBUSER, "-p"+Configuration.DBPASSWORD, "-h"+Configuration.DATABASE, value };
+				String[] command = { "gnome-terminal", "-x",  "sh", "-c", "mysql -u"+Configuration.DBUSER+ " -p"+Configuration.DBPASSWORD + " -h"+Configuration.DATABASE + " " + value , "&"};
 				Runtime.getRuntime().exec(command);
 				
 				//Runtime.getRuntime().exec("/bin/bash -c mysql -uroot -proot -hlocalhost "/* + value*/);
@@ -66,6 +51,10 @@ public class CommandToDB extends ActionDelegate implements IWorkbenchWindowActio
 		// TODO Auto-generated method stub
 
 	}
-	
+
+	public static void main(String[] args) throws IOException {
+		String[] command = { "gnome-terminal", "-x",  "sh", "-c", "mysql -u"+Configuration.DBUSER+ " -p"+Configuration.DBPASSWORD + " -h"+Configuration.DATABASE + " corp_mgodoy" , "&"};
+		Runtime.getRuntime().exec(command);
+	}
 
 }
