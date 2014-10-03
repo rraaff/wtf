@@ -3,8 +3,6 @@ package wtfplugin.actions;
 import java.util.HashMap;
 import java.util.Map;
 
-import wtfplugin.Activator;
-
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -17,6 +15,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbench;
@@ -24,6 +24,8 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionDelegate;
+
+import wtfplugin.Activator;
 
 
 public class JarsToProjects extends ActionDelegate implements IWorkbenchWindowActionDelegate {
@@ -56,8 +58,29 @@ public class JarsToProjects extends ActionDelegate implements IWorkbenchWindowAc
 		IWorkbench workbench = PlatformUI.getWorkbench();
 		Shell shell = workbench.getActiveWorkbenchWindow().getShell();
 		
+		boolean applybuilders = false;
+		MessageDialog dg = new MessageDialog(
+				shell,
+				"Desea aplicar el builder de RC y clases Persistentes",
+				null,
+				"Desea aplicar el builder de RC y clases Persistentes? Si es Corporate presione YES",
+				MessageDialog.QUESTION, 
+				new String[]{
+					IDialogConstants.YES_LABEL, 
+					IDialogConstants.NO_LABEL},
+				0
+				);
+		switch(dg.open()) {
+		case 0: 
+			applybuilders = true;
+			break;
+		case 1:
+			applybuilders = false;
+			break;
+		}
+		
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		{
+		if (applybuilders) {
 			try {
 				IProject[] projects = root.getProjects();
 				for (IProject pro : projects) {
@@ -93,7 +116,6 @@ public class JarsToProjects extends ActionDelegate implements IWorkbenchWindowAc
 			}
 		}
 		
-		System.out.println("push");
 		IProject[] projects = root.getProjects();
 		
 		Map<String, IProject> projectsMaps = new HashMap<String, IProject>();

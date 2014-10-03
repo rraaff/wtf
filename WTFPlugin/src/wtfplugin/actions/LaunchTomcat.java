@@ -1,6 +1,7 @@
 package wtfplugin.actions;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -41,6 +42,8 @@ import org.eclipse.ui.actions.ActionDelegate;
 import wtfplugin.Activator;
 
 public class LaunchTomcat extends ActionDelegate implements IWorkbenchWindowActionDelegate {
+	
+	private static String contextxml = null;
 	
 	private static String serverxml = null; 
 	private static byte keystore[];
@@ -177,6 +180,19 @@ public class LaunchTomcat extends ActionDelegate implements IWorkbenchWindowActi
 		File keystoreFile = new File(System.getProperty("user.home") + "/.keystoreWTF");
 		org.apache.commons.io.FileUtils.writeByteArrayToFile(keystoreFile, keystore);
 		
+		// Excribo el context.xml
+		File contextDir = JavaCore.getClasspathVariable("TOMCAT6_HOME").toFile();
+		org.apache.commons.io.FileUtils.deleteQuietly(new File(contextDir + "/conf/context.xml"));
+		if (true || contextxml== null) {
+			InputStream is = LaunchTomcat.class.getResourceAsStream("context.xml");
+			String tempServer = IOUtils.toString(is);
+			contextxml = tempServer;
+			is.close();
+		}
+		String newTempContext = contextxml.replace("@mongostore@", System.getProperty("user.name"));
+		File fileContext = new File(contextDir + "/conf/context.xml");
+		org.apache.commons.io.FileUtils.writeStringToFile(fileContext, newTempContext);
+		
 		// Primero escribo el server xml
 		org.apache.commons.io.FileUtils.deleteQuietly(new File(System.getProperty("java.io.tmpdir") + "/temp_server.xml"));
 		if (serverxml == null) {
@@ -192,11 +208,28 @@ public class LaunchTomcat extends ActionDelegate implements IWorkbenchWindowActi
 		newTempServer = newTempServer.replace("@httpsport@", httpsPort);
 		newTempServer = newTempServer.replace("@docbase@", docbase);
 		newTempServer = newTempServer.replace("@workdir@", workdir);
-		newTempServer = newTempServer.replace("@contextcontent@", contextContent);
-		
+		newTempServer = newTempServer.replace("@contextcontent@", contextContent);	
 		
 		File f = new File(System.getProperty("java.io.tmpdir") + "/temp_server.xml");
 		org.apache.commons.io.FileUtils.writeStringToFile(f, newTempServer);
+		
+		// copio las librerias de mongo si no estan
+		File mongoStore = JavaCore.getClasspathVariable("TOMCAT6_HOME").append("lib").append("mongo-store-proxy-1.6.jar").toFile();
+		if (!mongoStore.exists()) {
+			InputStream is = LaunchTomcat.class.getResourceAsStream("mongo-store-proxy-1.6.jar");
+			FileOutputStream fout= new FileOutputStream(mongoStore);
+			IOUtils.copy(is, fout);
+			is.close();
+			fout.close();
+		}
+		File mongoDriver = JavaCore.getClasspathVariable("TOMCAT6_HOME").append("lib").append("mongo-java-driver-2.10.1.jar").toFile();
+		if (!mongoDriver.exists()) {
+			InputStream is = LaunchTomcat.class.getResourceAsStream("mongo-java-driver-2.10.1.jar");
+			FileOutputStream fout= new FileOutputStream(mongoDriver);
+			IOUtils.copy(is, fout);
+			is.close();
+			fout.close();
+		}
 		
 		IJavaProject javaProject = JavaCore.create(project);
 		IRuntimeClasspathEntry projectOutputPath = JavaRuntime.newProjectRuntimeClasspathEntry(javaProject);
