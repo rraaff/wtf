@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: WTFPlugin
 Bundle-SymbolicName: WTFPlugin;singleton:=true
-Bundle-Version: 1.1.6
+Bundle-Version: 1.1.7
 Bundle-Activator: wtfplugin.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
@@ -26,4 +26,5 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: commons-io.jar,
  commons-lang.jar,
  .,
- swing2swt.jar
+ swing2swt.jar,
+ commons-collections.jar

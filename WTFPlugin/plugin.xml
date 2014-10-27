@@ -12,6 +12,15 @@
  </extension>
  
  <extension
+       id="confBuilder"
+       name="Builder para chequear la conf"
+       point="org.eclipse.core.resources.builders">
+    <builder hasNature="false">
+       <run class="wtfplugin.builder.ConfigurationBuilder"/>
+    </builder>
+ </extension>
+ 
+ <extension
          point="org.eclipse.ui.console.consoleFactories">
       <consoleFactory
             class="wtfplugin.console.MysqlConsoleFactory"
