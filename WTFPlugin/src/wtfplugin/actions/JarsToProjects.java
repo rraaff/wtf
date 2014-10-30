@@ -33,6 +33,15 @@ public class JarsToProjects extends ActionDelegate implements IWorkbenchWindowAc
 	public JarsToProjects() {
 	}
 	
+	private boolean hasConfBuilder(ICommand[] builders) {
+		for (ICommand command : builders) {
+			if (command.getBuilderName().equals("WTFPlugin.confBuilder")) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	private boolean hasRBBuilder(ICommand[] builders) {
 		for (ICommand command : builders) {
 			if (command.getBuilderName().equals("WTFPlugin.rbBuilder")) {
@@ -93,6 +102,18 @@ public class JarsToProjects extends ActionDelegate implements IWorkbenchWindowAc
 							ICommand buildCommand = desc.newCommand();
 							//buildCommand.setBuilder(new ClasspathVerifier());
 							buildCommand.setBuilderName("WTFPlugin.rbBuilder");
+							newbuilders[newbuilders.length - 1] = buildCommand;
+							desc.setBuildSpec(newbuilders);
+							pro.setDescription(desc, null);
+							builders = pro.getDescription().getBuildSpec();
+						}
+						if (!hasConfBuilder(builders)) {
+							ICommand newbuilders[] = new ICommand[builders.length + 1];
+							System.arraycopy(builders, 0, newbuilders, 0, builders.length);
+							IProjectDescription desc =pro.getDescription(); 
+							ICommand buildCommand = desc.newCommand();
+							//buildCommand.setBuilder(new ClasspathVerifier());
+							buildCommand.setBuilderName("WTFPlugin.confBuilder");
 							newbuilders[newbuilders.length - 1] = buildCommand;
 							desc.setBuildSpec(newbuilders);
 							pro.setDescription(desc, null);

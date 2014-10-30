@@ -228,11 +228,17 @@ public class ConfigurationBuilder extends IncrementalProjectBuilder {
 		for (EnvironmentBundles env : prod) {
 			for (Map.Entry<String, String> entry : env.getProps().entrySet()) {
 				if (entry.getValue().startsWith("http://")) {
-					char c = entry.getValue().charAt(7);
-					if (!StringUtils.isNumeric(String.valueOf(c))) {
-						if (!contains(prodOnly, entry.getKey())) {
-							fullToCompare.add("Posible referencia incorrecta por nombre en prod: " + entry.getKey() + "=" + entry.getValue());
+					if (!entry.getValue().startsWith("http://media") && !entry.getValue().startsWith("http://static")) {
+						char c = entry.getValue().charAt(7);
+						if (!StringUtils.isNumeric(String.valueOf(c))) {
+							if (!contains(prodOnly, entry.getKey())) {
+								fullToCompare.add("Posible referencia incorrecta por nombre en prod: " + entry.getKey() + "=" + entry.getValue());
+							}
 						}
+					}
+				} else {
+					if (posibleHostName(entry.getValue())) {
+						fullToCompare.add("Posible referencia incorrecta por nombre en prod: " + entry.getKey() + "=" + entry.getValue());
 					}
 				}
 			}
@@ -240,8 +246,14 @@ public class ConfigurationBuilder extends IncrementalProjectBuilder {
 		for (EnvironmentBundles env : prodOnly) {
 			for (Map.Entry<String, String> entry : env.getProps().entrySet()) {
 				if (entry.getValue().startsWith("http://")) {
-					char c = entry.getValue().charAt(7);
-					if (!StringUtils.isNumeric(String.valueOf(c))) {
+					if (!entry.getValue().startsWith("http://media") && !entry.getValue().startsWith("http://static")) {
+						char c = entry.getValue().charAt(7);
+						if (!StringUtils.isNumeric(String.valueOf(c))) {
+							fullToCompare.add("Posible referencia incorrecta por nombre en prod: " + entry.getKey() + "=" + entry.getValue());
+						}
+					}
+				} else {
+					if (posibleHostName(entry.getValue())) {
 						fullToCompare.add("Posible referencia incorrecta por nombre en prod: " + entry.getKey() + "=" + entry.getValue());
 					}
 				}
@@ -265,6 +277,18 @@ public class ConfigurationBuilder extends IncrementalProjectBuilder {
 		}
 	}
 	
+
+	private boolean posibleHostName(String value) {
+		if (value.endsWith(".html")) {
+			return false;
+		}
+		if (value.endsWith(".Driver")) {
+			return false;
+		}
+		Pattern p = Pattern.compile("^((?!-)[A-Za-z0-9-]{1,63}(?<!-)\\.)+[A-Za-z]{2,6}$");
+		Matcher m = p.matcher(value);
+		return m.matches();
+	}
 
 	private boolean contains(Set<EnvironmentBundles> prodOnly, String key) {
 		for (EnvironmentBundles e : prodOnly) {

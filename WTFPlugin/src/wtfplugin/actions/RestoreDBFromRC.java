@@ -67,12 +67,24 @@ public class RestoreDBFromRC extends ActionDelegate implements IWorkbenchWindowA
 						} catch (IOException e1) {}
 						String[] importcmds = { "/bin/sh", "-c", "mysql "+value+ " -h"+Configuration.DATABASE+" -u"+Configuration.DBUSER+" -p"+Configuration.DBPASSWORD+" -v < \"" +dumpName+"\"" };
 						ExecuteScriptsFromSelection.runAndLogToConsole(importcmds);
-						// creo database
+						// Quito descuentos
 						try {
-							new wtfplugin.console.ConsoleWriter().write("Cambiando passwords...");
+							new wtfplugin.console.ConsoleWriter().write("Quitando descuentos...");
+						} catch (IOException e1) {}
+						String[] nodiscountcmds = { "/bin/sh", "-c", "mysql "+value+ " -h"+Configuration.DATABASE+" -u"+Configuration.DBUSER+" -p"+Configuration.DBPASSWORD+" -e\"update company set discountHotels = 0, discountDomesticFlights = 0, discountInternationalFlights = 0;commit;\"" };
+						ExecuteScriptsFromSelection.runAndLogToConsole(nodiscountcmds );
+						// Cambio passwords 1
+						try {
+							new wtfplugin.console.ConsoleWriter().write("Cambiando passwords generales...");
 						} catch (IOException e1) {}
 						String[] passwordscmds = { "/bin/sh", "-c", "mysql "+value+ " -h"+Configuration.DATABASE+" -u"+Configuration.DBUSER+" -p"+Configuration.DBPASSWORD+" -e\"update employee set password = '26ca23e9d7e861e00803bcf927e5ec03';commit;\"" };
 						ExecuteScriptsFromSelection.runAndLogToConsole(passwordscmds );
+						// Cambio passwords 1
+						try {
+							new wtfplugin.console.ConsoleWriter().write("Cambiando passwords despegar...");
+						} catch (IOException e1) {}
+						String[] passwordscmds1 = { "/bin/sh", "-c", "mysql "+value+ " -h"+Configuration.DATABASE+" -u"+Configuration.DBUSER+" -p"+Configuration.DBPASSWORD+" -e\"update employee set password = 'dfe75bd98c8d113650e101c33fe1a93c' where company = 5;commit;\"" };
+						ExecuteScriptsFromSelection.runAndLogToConsole(passwordscmds1 );
 						// alerta de posibilidad de tener que correr scripts
 						new ConsoleWriter().append("Base restaurada, verifique si debe correr scripts");
 					} catch (IOException e) {
