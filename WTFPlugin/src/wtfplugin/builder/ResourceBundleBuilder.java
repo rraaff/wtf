@@ -4,9 +4,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -27,6 +29,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.internal.ui.compare.ResizableDialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.swt.widgets.Display;
 
@@ -55,6 +58,9 @@ public class ResourceBundleBuilder extends IncrementalProjectBuilder {
 	private static Set<String> suspectedExtras = new HashSet<String>();
 	
 	private boolean propertiesModified = false;
+	
+	private boolean fullBuild = false;
+	private boolean alreadyShown = false;
 
 	class SampleDeltaVisitor implements IResourceDeltaVisitor {
 		/*
@@ -258,17 +264,21 @@ public class ResourceBundleBuilder extends IncrementalProjectBuilder {
 	protected IProject[] build(int kind, Map args, IProgressMonitor monitor) throws CoreException {
 		try {
 			if (kind == FULL_BUILD) {
+				fullBuild = true;
 				usedResourceBundles = new HashSet<String>();
 				resourceBundles.clear();
 				getProject().accept(new SampleResourceVisitor(monitor));
 				performChecks();
+				alreadyShown = true;
 			} else {
+				fullBuild = false;
 				propertiesModified = false;
 				IResourceDelta delta = getDelta(getProject());
 				incrementalBuild(delta, monitor);
 				if (propertiesModified) {
 					performChecks();
 				}
+				alreadyShown = true;
 			}
 		} catch (Exception e) {
 			Activator.showException(e);
@@ -300,34 +310,51 @@ public class ResourceBundleBuilder extends IncrementalProjectBuilder {
 				exampleValue.put(key, "");
 			}
 		}
-		
+		List<String> errors = new ArrayList<String>();
+		boolean missingBundles= false;
 		// Comparo las keys de cada pais con las keys totales
 		for (LanguageBundles lb : resourceBundles.values()) { // para cada lenguage
 			for (CountryBundles cb : lb.getCountries().values()) { // para cada pais
 				Set<String> countryKeys = lb.getCountryKeys(cb);
-				Set<String> fullToCompare = new HashSet<String>();
-				fullToCompare.addAll(fullKeys);
-				
-				fullToCompare.removeAll(countryKeys);
-				fullToCompare.addAll(lb.getCountryPendingKeys(cb));
-				
-				if (!fullToCompare.isEmpty()) {
-					final String PID = Activator.PLUGIN_ID;
-					final String lbF = lb.getLanguage();
-					final String cbF = cb.getCountry();
-					   final MultiStatus info = new MultiStatus(PID, 1, "Se han encontrado errores de rb para " + lbF + " " + cbF, null);
-					   for (String key : fullToCompare) {
-							 info.add(new Status(IStatus.ERROR, PID, 1, key + "=" + exampleValue.get(key), null));
-						}
-					   final MultiStatus infoFinal = info;
-					   Display.getDefault().syncExec( new Runnable() {
-							public void run() {
-								// Aca setear en un label contribution al status bar el tipo de error, que on click lo vuelva a mostrar, con un icono de ok, error, fatal
-							   ErrorDialog.openError(Activator.getDefault().getWorkbench()
-										.getWorkbenchWindows()[0].getShell(), "Errores de rb para " + lbF + " " + cbF, null, infoFinal);
-							}
-					  });
+				Set<String> missing = new HashSet<String>();
+				missing.addAll(fullKeys);
+				missing.removeAll(countryKeys);
+				Set<String> revisionPending = new HashSet<String>();
+				revisionPending.addAll(lb.getCountryPendingKeys(cb));
+				final String lbF = lb.getLanguage();
+				final String cbF = cb.getCountry();
+				if (!missing.isEmpty()) {
+					missingBundles= true;
+					errors.add("Los siguientes de rb faltan " + lbF + " " + cbF);
+					for (String st : missing) {
+						errors.add(st + "=" + exampleValue.get(st));
+					}
+					errors.add("------------------------------------------------------------------------------------------------------------------------------------------------------------");
 				}
+				if (!revisionPending.isEmpty()) {
+					errors.add("Los siguientes de rb deben revisarse " + lbF + " " + cbF);
+					for (String st : revisionPending) {
+						errors.add(st + "=" + exampleValue.get(st));
+					}
+					errors.add("------------------------------------------------------------------------------------------------------------------------------------------------------------");
+				}
+			}
+		}
+		if (fullBuild || !alreadyShown || missingBundles) {
+			if (!errors.isEmpty()) {
+				final String PID = Activator.PLUGIN_ID;
+				final MultiStatus info = new MultiStatus(PID, 1, "Se han encontrado errores de rb", null);
+				for (String key : errors) {
+					info.add(new Status(IStatus.ERROR, PID, 1, key, null));
+				}
+				final MultiStatus infoFinal = info;
+				Display.getDefault().syncExec( new Runnable() {
+					public void run() {
+						// Aca setear en un label contribution al status bar el tipo de error, que on click lo vuelva a mostrar, con un icono de ok, error, fatal
+						ErrorDialog.openError(Activator.getDefault().getWorkbench()
+								.getWorkbenchWindows()[0].getShell(), "Errores de rb", null, infoFinal);
+					}
+				});
 			}
 		}
 		// comparo full keys con lo que encontre, esto me da los que tengo de mas

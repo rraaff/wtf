@@ -121,7 +121,7 @@ public class ConfigurationBuilder extends IncrementalProjectBuilder {
 						if (env.equals("app")) {
 //						esto es global
 							globalConf.add(new EnvironmentBundles(file, "app", readFileLines(file)));
-							System.out.println("global " + file.getFullPath().toString());
+//							System.out.println("global " + file.getFullPath().toString());
 						}
 						if (app.equals("app")) {
 							// esto no es global
@@ -131,7 +131,7 @@ public class ConfigurationBuilder extends IncrementalProjectBuilder {
 								envConf.put(env, envs);
 							}
 							envs.add(new EnvironmentBundles(file, env, readFileLines(file)));
-							System.out.println("env " + env + " - " + file.getFullPath().toString());
+//							System.out.println("env " + env + " - " + file.getFullPath().toString());
 						
 						}
 					}
@@ -325,7 +325,9 @@ public class ConfigurationBuilder extends IncrementalProjectBuilder {
 	
 	private Set<EnvironmentBundles> getProductionOnlyProperties() {
 		Set<EnvironmentBundles> result = new HashSet<EnvironmentBundles>();
-		result.addAll(envConf.get("prod"));
+		if (envConf.get("prod") != null)  {
+			result.addAll(envConf.get("prod"));
+		}
 		return result;
 	}
 
