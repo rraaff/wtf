@@ -26,4 +26,12 @@ public class EnvironmentBundles {
 		this.props = props;
 	}
 
+	public IFile getFile() {
+		return file;
+	}
+
+	public void setFile(IFile file) {
+		this.file = file;
+	}
+
 }

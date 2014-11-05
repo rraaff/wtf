@@ -119,17 +119,34 @@ public class ConfigurationBuilder extends IncrementalProjectBuilder {
 						String conf = segments[segments.length - 4];
 						
 						if (env.equals("app")) {
+							propertiesModified = true;
 //						esto es global
+							Set<EnvironmentBundles> newGlobalConf = new HashSet<EnvironmentBundles>();
+							for (EnvironmentBundles e : globalConf) {
+								if (!e.getFile().getName().equals(file.getName())) {
+									newGlobalConf.add(e);
+								}
+							}
+							globalConf = newGlobalConf;
 							globalConf.add(new EnvironmentBundles(file, "app", readFileLines(file)));
 //							System.out.println("global " + file.getFullPath().toString());
 						}
 						if (app.equals("app")) {
+							propertiesModified = true;
 							// esto no es global
 							Set<EnvironmentBundles> envs = envConf.get(env);
 							if (envs == null) {
 								envs = new HashSet<EnvironmentBundles>();
 								envConf.put(env, envs);
 							}
+							Set<EnvironmentBundles> newConf = new HashSet<EnvironmentBundles>();
+							for (EnvironmentBundles e : envs) {
+								if (!e.getFile().getName().equals(file.getName())) {
+									newConf.add(e);
+								}
+							}
+							envs.clear();
+							envs.addAll(newConf);
 							envs.add(new EnvironmentBundles(file, env, readFileLines(file)));
 //							System.out.println("env " + env + " - " + file.getFullPath().toString());
 						
@@ -138,8 +155,7 @@ public class ConfigurationBuilder extends IncrementalProjectBuilder {
 				}
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Activator.showException(e);
 		}
 	}
 
