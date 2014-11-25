@@ -1,7 +1,10 @@
 package wtfplugin.actions;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
@@ -166,7 +169,9 @@ public class JarsToProjects extends ActionDelegate implements IWorkbenchWindowAc
 			StringBuffer sb = new StringBuffer();
 			IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 			IJavaProject javaProject = JavaCore.create(iterProyect);
-			IClasspathEntry[] entries = javaProject.getRawClasspath(); 
+			IClasspathEntry[] entries = javaProject.getRawClasspath();
+			Set<String> newEntriesSet = new HashSet<String>();
+			ArrayList<IClasspathEntry> newEntries = new ArrayList<IClasspathEntry>();
 			int index = 0;
 			for (IClasspathEntry classpathEntry : entries) {
 				if (IClasspathEntry.CPE_VARIABLE == classpathEntry.getEntryKind()) {
@@ -174,11 +179,15 @@ public class JarsToProjects extends ActionDelegate implements IWorkbenchWindowAc
 					System.out.println(projectToReference);
 					IProject project = projectsMaps.get(projectToReference.toLowerCase());
 					if (project != null) {
-						System.out.println("project found " + project.getName());
-						entries[index] = JavaCore.newProjectEntry(new Path("/" + project.getName()), true);
-						sb.append("\n" + classpathEntry.getPath().lastSegment() + " > " + project.getName());
+						if (!newEntriesSet.contains(project.getName())) {
+							System.out.println("project found " + project.getName());
+							entries[index] = JavaCore.newProjectEntry(new Path("/" + project.getName()), true);
+							newEntries.add(JavaCore.newProjectEntry(new Path("/" + project.getName()), true));
+							newEntriesSet.add(project.getName());
+							sb.append("\n" + classpathEntry.getPath().lastSegment() + " > " + project.getName());
+						}
 					} else {
-						entries[index] =  JavaCore.newVariableEntry(classpathEntry.getPath(), classpathEntry.getSourceAttachmentPath(), classpathEntry.getSourceAttachmentRootPath(), true);
+						newEntries.add(JavaCore.newVariableEntry(classpathEntry.getPath(), classpathEntry.getSourceAttachmentPath(), classpathEntry.getSourceAttachmentRootPath(), true));
 					}
 				} 
 				index++;
