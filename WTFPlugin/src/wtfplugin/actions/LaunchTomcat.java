@@ -243,9 +243,11 @@ public class LaunchTomcat extends ActionDelegate implements IWorkbenchWindowActi
 		String jvmArgsParams = jvmArgs;
 		if (jvmArgsParams != null) {
 			int beginIndex = jvmArgsParams.indexOf(":3306/") + 6;
-			String first = jvmArgsParams.substring(0, beginIndex);
-			String second = jvmArgsParams.substring(jvmArgsParams.indexOf("?", beginIndex));
-			jvmArgsParams = first + WTFPreferences.getUsername() + second;
+			if (beginIndex != -1) {
+				String first = jvmArgsParams.substring(0, beginIndex);
+				String second = jvmArgsParams.substring(jvmArgsParams.indexOf("?", beginIndex));
+				jvmArgsParams = first + WTFPreferences.getUsername() + second;
+			}
 		} else {
 			jvmArgsParams = "";
 		}
