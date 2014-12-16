@@ -189,11 +189,13 @@ public class JarsToProjects extends ActionDelegate implements IWorkbenchWindowAc
 					} else {
 						newEntries.add(JavaCore.newVariableEntry(classpathEntry.getPath(), classpathEntry.getSourceAttachmentPath(), classpathEntry.getSourceAttachmentRootPath(), true));
 					}
-				} 
+				} else {
+					newEntries.add(classpathEntry);
+				}
 				index++;
 			}
 			try {
-				javaProject.setRawClasspath(entries, null);
+				javaProject.setRawClasspath(newEntries.toArray(new IClasspathEntry[0]), null);
 			} catch (Exception e) {
 				Activator.showException(e);
 			}

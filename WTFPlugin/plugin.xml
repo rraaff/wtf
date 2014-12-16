@@ -27,6 +27,15 @@
             icon="icons/jdbc_16.gif"
             label="MYSQL console"/>
    </extension>
+   
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            name="WTF preferences"
+            class="wtfplugin.preferences.WTFPreferences"
+            id="wtfplugin.preferences.WTFPreferences">
+      </page>
+   </extension>
  
  <extension
        id="classpathVerifier"

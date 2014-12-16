@@ -40,6 +40,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionDelegate;
 
 import wtfplugin.Activator;
+import wtfplugin.preferences.WTFPreferences;
 
 public class LaunchTomcat extends ActionDelegate implements IWorkbenchWindowActionDelegate {
 	
@@ -189,7 +190,8 @@ public class LaunchTomcat extends ActionDelegate implements IWorkbenchWindowActi
 			contextxml = tempServer;
 			is.close();
 		}
-		String newTempContext = contextxml.replace("@mongostore@", System.getProperty("user.name"));
+		
+		String newTempContext = contextxml.replace("@mongostore@", WTFPreferences.getUsername());
 		File fileContext = new File(contextDir + "/conf/context.xml");
 		org.apache.commons.io.FileUtils.writeStringToFile(fileContext, newTempContext);
 		
@@ -238,10 +240,20 @@ public class LaunchTomcat extends ActionDelegate implements IWorkbenchWindowActi
 //			classpath.add("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><runtimeClasspathEntry path=\"/home/mgodoy/gitorious/test_plugin/wtf/wtf-service-web/target/classes\" type=\"1\"/>");
 		addToClasspath(classpath, javaProject);
 		
+		String jvmArgsParams = jvmArgs;
+		if (jvmArgsParams != null) {
+			int beginIndex = jvmArgsParams.indexOf(":3306/") + 6;
+			String first = jvmArgsParams.substring(0, beginIndex);
+			String second = jvmArgsParams.substring(jvmArgsParams.indexOf("?", beginIndex));
+			jvmArgsParams = first + WTFPreferences.getUsername() + second;
+		} else {
+			jvmArgsParams = "";
+		}
+		
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, classpath);
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, false);
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, "-Djava.endorsed.dirs=\"..\\common\\endorsed\""
-				+ "-Dcatalina.base=\"..\"" + "-Dcatalina.home=\"..\"" + "-Djava.io.tmpdir=\"..\\temp\" " + (jvmArgs == null ? "" : jvmArgs));
+				+ "-Dcatalina.base=\"..\"" + "-Dcatalina.home=\"..\"" + "-Djava.io.tmpdir=\"..\\temp\" " + (jvmArgsParams));
 		
 		
 		File workingDir = JavaCore.getClasspathVariable("TOMCAT6_HOME").append("bin").toFile();
