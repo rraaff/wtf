@@ -23,8 +23,10 @@ import wtfplugin.Activator;
 public class WTFPreferences extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
 	private static final String P_USERNAME = "username";
+	private static final String P_TOMCAT_VERSION = "tomcatVersion";
 
 	private StringFieldEditor userName = null;
+	private StringFieldEditor tomcatVersion = null;
 
 	public WTFPreferences() {
 		super(GRID);
@@ -36,6 +38,14 @@ public class WTFPreferences extends FieldEditorPreferencePage implements IWorkbe
 	public static String getUsername() {
 		return Activator.getDefault().getPreferenceStore().getString(WTFPreferences.P_USERNAME);
 	}
+	
+	public static String getTomcatVersion() {
+		return Activator.getDefault().getPreferenceStore().getString(WTFPreferences.P_TOMCAT_VERSION);
+	}
+	
+	public static String getTomcatVariable() {
+		return "TOMCAT" + getTomcatVersion() + "_HOME";
+	}
 
 	/**
 	 * Sets the default values of the preferences.
@@ -44,6 +54,9 @@ public class WTFPreferences extends FieldEditorPreferencePage implements IWorkbe
 		IPreferenceStore store = this.getPreferenceStore();
 		if (store.getString(P_USERNAME) == null || store.getString(P_USERNAME).length() == 0) {
 			store.setValue(P_USERNAME, "corp_" + System.getProperty("user.name"));
+		}
+		if (store.getString(P_TOMCAT_VERSION) == null || store.getString(P_TOMCAT_VERSION).length() == 0) {
+			store.setValue(P_TOMCAT_VERSION, "6");
 		}
 	}
 	
@@ -56,6 +69,9 @@ public class WTFPreferences extends FieldEditorPreferencePage implements IWorkbe
 	public void createFieldEditors() {
 		userName = new StringFieldEditor(P_USERNAME, "Usuario:", getFieldEditorParent());
 		addField(userName);
+		
+		tomcatVersion = new StringFieldEditor(P_TOMCAT_VERSION, "Version de tomcat:", getFieldEditorParent());
+		addField(tomcatVersion);
 	}
 
 
@@ -70,6 +86,8 @@ public class WTFPreferences extends FieldEditorPreferencePage implements IWorkbe
 	public boolean performOk() {
 		userName.store();
 		this.getPreferenceStore().setValue(P_USERNAME, userName.getStringValue());
+		tomcatVersion.store();
+		this.getPreferenceStore().setValue(P_TOMCAT_VERSION, tomcatVersion.getStringValue());
 		return true;
 	}
 

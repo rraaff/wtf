@@ -1,7 +1,7 @@
 <Server port="@serverport@" shutdown="SHUTDOWN">
 
   <Listener className="org.apache.catalina.core.AprLifecycleListener" />
-  <Listener className="org.apache.catalina.mbeans.ServerLifecycleListener" />
+  <!-- Listener className="org.apache.catalina.mbeans.ServerLifecycleListener" /-->
   <Listener className="org.apache.catalina.mbeans.GlobalResourcesLifecycleListener" />
 
   <GlobalNamingResources>
