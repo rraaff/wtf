@@ -40,7 +40,11 @@ public class WTFPreferences extends FieldEditorPreferencePage implements IWorkbe
 	}
 	
 	public static String getTomcatVersion() {
-		return Activator.getDefault().getPreferenceStore().getString(WTFPreferences.P_TOMCAT_VERSION);
+		String result = Activator.getDefault().getPreferenceStore().getString(WTFPreferences.P_TOMCAT_VERSION);
+		if (!"7".equals(result)) {
+			result = "6";
+		}
+		return result;
 	}
 	
 	public static String getTomcatVariable() {
