@@ -6,9 +6,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -63,14 +66,14 @@ public class LaunchTomcat6 {
 		ILaunchConfiguration[] configurations = manager.getLaunchConfigurations(type);
 		for (int i = 0; i < configurations.length; i++) {
 			ILaunchConfiguration configuration = configurations[i];
-			if (configuration.getName().equals("Start Tomcat")) {
+			if (configuration.getName().equals("Start-" + webappname)) {
 				configuration.delete();
 				break;
 			}
 		}
 		IVMInstall jre = JavaRuntime.getDefaultVMInstall();
 		File jdkHome = jre.getInstallLocation();
-		ILaunchConfigurationWorkingCopy workingCopy = type.newInstance(null, "Start Tomcat");
+		ILaunchConfigurationWorkingCopy workingCopy = type.newInstance(null, "Start-" + webappname);
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_INSTALL_NAME, jre.getName());
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_INSTALL_TYPE, jre.getVMInstallType().getId());
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, "org.apache.catalina.startup.Bootstrap");
@@ -125,9 +128,11 @@ public class LaunchTomcat6 {
 			is.close();
 		}
 		
-		String newTempContext = LaunchTomcat.contextxml.replace("@mongostore@", WTFPreferences.getUsername());
-		File fileContext = new File(contextDir + "/conf/context.xml");
-		org.apache.commons.io.FileUtils.writeStringToFile(fileContext, newTempContext);
+		if (WTFPreferences.clusterSessionMongo()) {
+			String newTempContext = LaunchTomcat.contextxml.replace("@mongostore@", WTFPreferences.getUsername());
+			File fileContext = new File(contextDir + "/conf/context.xml");
+			org.apache.commons.io.FileUtils.writeStringToFile(fileContext, newTempContext);
+		}
 		
 		// Primero escribo el server xml
 		org.apache.commons.io.FileUtils.deleteQuietly(new File(System.getProperty("java.io.tmpdir") + "/temp_server.xml"));
@@ -176,11 +181,11 @@ public class LaunchTomcat6 {
 		
 		String jvmArgsParams = jvmArgs;
 		if (jvmArgsParams != null) {
-			int beginIndex = jvmArgsParams.indexOf(":3306/") + 6;
-			if (beginIndex != -1) {
-				String first = jvmArgsParams.substring(0, beginIndex);
-				String second = jvmArgsParams.substring(jvmArgsParams.indexOf("?", beginIndex));
-				jvmArgsParams = first + WTFPreferences.getUsername() + second;
+			Map<String, String> replacements = WTFPreferences.getReplacementsJVM();
+			replacements.put("corporate_dev", WTFPreferences.getUsername());
+			replacements.put("[username]", WTFPreferences.getUsername());
+			for (Map.Entry<String, String> entry : replacements.entrySet()) {
+				jvmArgsParams = StringUtils.replace(jvmArgsParams, entry.getKey(), entry.getValue());
 			}
 		} else {
 			jvmArgsParams = "";

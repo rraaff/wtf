@@ -52,7 +52,7 @@ public class LaunchTomcat7 {
 	public static void launchTomcat(IProject project, String webappname, String port, String httpsPort, String serverPort, String contextContent, String jvmArgs) throws CoreException, IOException, JavaModelException {
 		
 		IProcess process= DebugUITools.getCurrentProcess();
-		if (process != null && process.getLaunch().getLaunchConfiguration().getName().equals("Start Tomcat")) {
+		if (process != null && process.getLaunch().getLaunchConfiguration().getName().equals("Start-" + webappname)) {
 			process.terminate();
 		}
 			
@@ -63,7 +63,7 @@ public class LaunchTomcat7 {
 		ILaunchConfiguration[] configurations = manager.getLaunchConfigurations(type);
 		for (int i = 0; i < configurations.length; i++) {
 			ILaunchConfiguration configuration = configurations[i];
-			if (configuration.getName().equals("Start Tomcat")) {
+			if (configuration.getName().equals("Start-" + webappname)) {
 				configuration.delete();
 				break;
 			}

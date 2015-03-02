@@ -1,5 +1,10 @@
 package wtfplugin.preferences;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
+import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.StringFieldEditor;
@@ -24,9 +29,13 @@ public class WTFPreferences extends FieldEditorPreferencePage implements IWorkbe
 
 	private static final String P_USERNAME = "username";
 	private static final String P_TOMCAT_VERSION = "tomcatVersion";
+	private static final String P_REPLACEMENTS_JVM = "replacementsJVM";
+	private static final String P_CLUSTER_SESSION_MONGO = "clusterSessionMongo";
 
 	private StringFieldEditor userName = null;
 	private StringFieldEditor tomcatVersion = null;
+	private StringFieldEditor replacementsJVM = null;
+	private BooleanFieldEditor clusterSessionMongo = null;
 
 	public WTFPreferences() {
 		super(GRID);
@@ -47,6 +56,29 @@ public class WTFPreferences extends FieldEditorPreferencePage implements IWorkbe
 		return result;
 	}
 	
+	public static Map<String, String> getReplacementsJVM() {
+		String data = Activator.getDefault().getPreferenceStore().getString(WTFPreferences.P_REPLACEMENTS_JVM);
+		Map<String, String> result = new HashMap<String, String>();
+		if (data == null || StringUtils.isEmpty(data)) {
+			return result;
+		}
+		for (String pair : data.split(",")) {
+			if (!StringUtils.isEmpty(pair) && pair.contains("=")) {
+	            String[] kv = pair.split("=");
+	            result.put(kv[0], kv[1]);
+			}
+        }
+		return result;
+	}
+	
+	public static Boolean clusterSessionMongo() {
+		Boolean result = Activator.getDefault().getPreferenceStore().getBoolean(P_CLUSTER_SESSION_MONGO);
+		if (result == null) {
+			return true;
+		}
+		return result;
+	}
+	
 	public static String getTomcatVariable() {
 		return "TOMCAT" + getTomcatVersion() + "_HOME";
 	}
@@ -62,6 +94,7 @@ public class WTFPreferences extends FieldEditorPreferencePage implements IWorkbe
 		if (store.getString(P_TOMCAT_VERSION) == null || store.getString(P_TOMCAT_VERSION).length() == 0) {
 			store.setValue(P_TOMCAT_VERSION, "6");
 		}
+		
 	}
 	
 	/**
@@ -76,6 +109,12 @@ public class WTFPreferences extends FieldEditorPreferencePage implements IWorkbe
 		
 		tomcatVersion = new StringFieldEditor(P_TOMCAT_VERSION, "Version de tomcat:", getFieldEditorParent());
 		addField(tomcatVersion);
+		
+		replacementsJVM = new StringFieldEditor(P_REPLACEMENTS_JVM, "Replacements (key=value,...):", getFieldEditorParent());
+		addField(replacementsJVM);
+		
+		clusterSessionMongo = new BooleanFieldEditor(P_CLUSTER_SESSION_MONGO, "Session en cluster mongo:", getFieldEditorParent());
+		addField(clusterSessionMongo);
 	}
 
 
@@ -90,8 +129,15 @@ public class WTFPreferences extends FieldEditorPreferencePage implements IWorkbe
 	public boolean performOk() {
 		userName.store();
 		this.getPreferenceStore().setValue(P_USERNAME, userName.getStringValue());
+		
 		tomcatVersion.store();
 		this.getPreferenceStore().setValue(P_TOMCAT_VERSION, tomcatVersion.getStringValue());
+		
+		replacementsJVM.store();
+		this.getPreferenceStore().setValue(P_REPLACEMENTS_JVM, replacementsJVM.getStringValue());
+		
+		clusterSessionMongo.store();
+		this.getPreferenceStore().setValue(P_CLUSTER_SESSION_MONGO, clusterSessionMongo.getBooleanValue());
 		return true;
 	}
 
