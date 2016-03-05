@@ -25,7 +25,7 @@
       <consoleFactory
             class="wtfplugin.console.MysqlConsoleFactory"
             icon="icons/jdbc_16.gif"
-            label="MYSQL console"/>
+            label="WTF console"/>
    </extension>
    
    <extension

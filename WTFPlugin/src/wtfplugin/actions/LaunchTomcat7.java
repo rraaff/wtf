@@ -52,7 +52,7 @@ public class LaunchTomcat7 {
 	public static void launchTomcat(IProject project, String webappname, String port, String httpsPort, String serverPort, String contextContent, String jvmArgs) throws CoreException, IOException, JavaModelException {
 		
 		IProcess process= DebugUITools.getCurrentProcess();
-		if (process != null && process.getLaunch().getLaunchConfiguration().getName().equals("Start-" + webappname)) {
+		if (process != null && process.getLaunch().getLaunchConfiguration().getName().equals("Start-" + webappname.substring(1))) {
 			process.terminate();
 		}
 			
@@ -63,14 +63,14 @@ public class LaunchTomcat7 {
 		ILaunchConfiguration[] configurations = manager.getLaunchConfigurations(type);
 		for (int i = 0; i < configurations.length; i++) {
 			ILaunchConfiguration configuration = configurations[i];
-			if (configuration.getName().equals("Start-" + webappname)) {
+			if (configuration.getName().equals("Start-" + webappname.substring(1))) {
 				configuration.delete();
 				break;
 			}
 		}
 		IVMInstall jre = JavaRuntime.getDefaultVMInstall();
 		File jdkHome = jre.getInstallLocation();
-		ILaunchConfigurationWorkingCopy workingCopy = type.newInstance(null, "Start Tomcat");
+		ILaunchConfigurationWorkingCopy workingCopy = type.newInstance(null, "Start-" + webappname.substring(1));
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_INSTALL_NAME, jre.getName());
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_INSTALL_TYPE, jre.getVMInstallType().getId());
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, "org.apache.catalina.startup.Bootstrap");
@@ -120,18 +120,19 @@ public class LaunchTomcat7 {
 		
 		// Excribo el context.xml
 		File contextDir = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable()).toFile();
-		org.apache.commons.io.FileUtils.deleteQuietly(new File(contextDir + "/conf/context.xml"));
-		if (LaunchTomcat.contextxml== null) {
-			InputStream is = LaunchTomcat7.class.getResourceAsStream("context.xml");
-			String tempServer = IOUtils.toString(is);
-			LaunchTomcat.contextxml = tempServer;
-			is.close();
+		if (WTFPreferences.clusterSessionMongo()) {
+			org.apache.commons.io.FileUtils.deleteQuietly(new File(contextDir + "/conf/context.xml"));
+			if (LaunchTomcat.contextxml== null) {
+				InputStream is = LaunchTomcat7.class.getResourceAsStream("context.xml");
+				String tempServer = IOUtils.toString(is);
+				LaunchTomcat.contextxml = tempServer;
+				is.close();
+			}
+			
+			String newTempContext = LaunchTomcat.contextxml.replace("@mongostore@", WTFPreferences.getUsername());
+			File fileContext = new File(contextDir + "/conf/context.xml");
+			org.apache.commons.io.FileUtils.writeStringToFile(fileContext, newTempContext);
 		}
-		
-		String newTempContext = LaunchTomcat.contextxml.replace("@mongostore@", WTFPreferences.getUsername());
-		File fileContext = new File(contextDir + "/conf/context.xml");
-		org.apache.commons.io.FileUtils.writeStringToFile(fileContext, newTempContext);
-		
 		// Primero escribo el server xml
 		org.apache.commons.io.FileUtils.deleteQuietly(new File(System.getProperty("java.io.tmpdir") + "/temp_server.xml"));
 //		if (serverxml == null) {
@@ -181,8 +182,9 @@ public class LaunchTomcat7 {
 		
 		String jvmArgsParams = jvmArgs;
 		if (jvmArgsParams != null) {
-			int beginIndex = jvmArgsParams.indexOf(":3306/") + 6;
+			int beginIndex = jvmArgsParams.indexOf(":3306/");
 			if (beginIndex != -1) {
+				beginIndex = beginIndex  + 6;
 				String first = jvmArgsParams.substring(0, beginIndex);
 				String second = jvmArgsParams.substring(jvmArgsParams.indexOf("?", beginIndex));
 				jvmArgsParams = first + WTFPreferences.getUsername() + second;

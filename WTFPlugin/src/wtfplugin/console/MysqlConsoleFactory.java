@@ -18,7 +18,7 @@ import org.eclipse.ui.console.MessageConsoleStream;
 
 public class MysqlConsoleFactory implements IConsoleFactory {
 
-	private static final String SQLPLUS_CONSOLE_VIEW = "MYSQL Console";
+	private static final String SQLPLUS_CONSOLE_VIEW = "WTF Console";
 
 	private static String buffer = "";
 	

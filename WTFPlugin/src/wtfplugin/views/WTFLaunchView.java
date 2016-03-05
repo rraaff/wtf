@@ -86,7 +86,7 @@ public class WTFLaunchView extends ViewPart {
 //								gd_btnVersionComercial.height = 50;
 //								gd_btnVersionComercial.width= 250;
 //								b.setLayoutData(gd_btnVersionComercial);
-								b.setText("\n   " + pro.getName() + "   \n");
+								b.setText(pro.getName() + "\n");
 								InputStream is = null;
 								try {
 										Properties props = new Properties();
@@ -95,6 +95,8 @@ public class WTFLaunchView extends ViewPart {
 										if ("true".equals(props.getProperty("default", "false"))) {
 											b.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GREEN));
 										}
+										b.setText(pro.getName() + "\n" + props.getProperty("port", "8080") + ":" + props.getProperty("httpsPort", "8443"));
+										b.setToolTipText(props.getProperty("contextPath"));
 								} finally {
 									if (is!= null) {
 										try {
