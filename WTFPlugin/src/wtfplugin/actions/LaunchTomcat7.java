@@ -130,6 +130,7 @@ public class LaunchTomcat7 {
 			}
 			
 			String newTempContext = LaunchTomcat.contextxml.replace("@mongostore@", WTFPreferences.getUsername());
+			newTempContext = newTempContext.replace("@mongosessionhost@", WTFPreferences.getMongosessionhosts());
 			File fileContext = new File(contextDir + "/conf/context.xml");
 			org.apache.commons.io.FileUtils.writeStringToFile(fileContext, newTempContext);
 		}
@@ -146,8 +147,18 @@ public class LaunchTomcat7 {
 		String newTempServer = LaunchTomcat.serverxml.replace("@contextpath@", webappname);
 		newTempServer = newTempServer.replace("@appbase@", appBase);
 		newTempServer = newTempServer.replace("@serverport@", serverPort);
-		newTempServer = newTempServer.replace("@httpport@", port);
-		newTempServer = newTempServer.replace("@httpsport@", httpsPort);
+		if (!port.equals("")) {
+			String repl = LaunchTomcat6.HTTP.replace("@httpport@", port);
+			newTempServer = newTempServer.replace("@HTTPCONNECTOR@", repl);
+		} else {
+			newTempServer = newTempServer.replace("@HTTPCONNECTOR@", "");
+		}
+		if (!httpsPort.equals("")) {
+			String repl = LaunchTomcat6.HTTPS.replace("@httpsport@", httpsPort);
+			newTempServer = newTempServer.replace("@HTTPSCONNECTOR@", repl);
+		} else {
+			newTempServer = newTempServer.replace("@HTTPSCONNECTOR@", "");
+		}
 		newTempServer = newTempServer.replace("@docbase@", docbase);
 		newTempServer = newTempServer.replace("@workdir@", workdir);
 		newTempServer = newTempServer.replace("@contextcontent@", contextContent);	

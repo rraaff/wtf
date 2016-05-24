@@ -31,11 +31,15 @@ public class WTFPreferences extends FieldEditorPreferencePage implements IWorkbe
 	private static final String P_TOMCAT_VERSION = "tomcatVersion";
 	private static final String P_REPLACEMENTS_JVM = "replacementsJVM";
 	private static final String P_CLUSTER_SESSION_MONGO = "clusterSessionMongo";
+	private static final String P_HOME_OFFICE = "homeOffice";
+	private static final String P_MONGO_SESSION_HOST = "mongosessionhost";
 
 	private StringFieldEditor userName = null;
 	private StringFieldEditor tomcatVersion = null;
 	private StringFieldEditor replacementsJVM = null;
 	private BooleanFieldEditor clusterSessionMongo = null;
+	private BooleanFieldEditor homeOffice = null;
+	private StringFieldEditor mongosessionhost = null;
 
 	public WTFPreferences() {
 		super(GRID);
@@ -46,6 +50,15 @@ public class WTFPreferences extends FieldEditorPreferencePage implements IWorkbe
 
 	public static String getUsername() {
 		return Activator.getDefault().getPreferenceStore().getString(WTFPreferences.P_USERNAME);
+	}
+	
+	public static String getMongosessionhosts() {
+		String result =  Activator.getDefault().getPreferenceStore().getString(WTFPreferences.P_MONGO_SESSION_HOST);
+		if (result == null || result.trim().length() == 0) {
+			return "corporate-db";
+		} else {
+			return result;
+		}
 	}
 	
 	public static String getTomcatVersion() {
@@ -79,6 +92,14 @@ public class WTFPreferences extends FieldEditorPreferencePage implements IWorkbe
 		return result;
 	}
 	
+	public static Boolean homeOffice() {
+		Boolean result = Activator.getDefault().getPreferenceStore().getBoolean(P_HOME_OFFICE);
+		if (result == null) {
+			return false;
+		}
+		return result;
+	}
+	
 	public static String getTomcatVariable() {
 		return "TOMCAT" + getTomcatVersion() + "_HOME";
 	}
@@ -94,7 +115,10 @@ public class WTFPreferences extends FieldEditorPreferencePage implements IWorkbe
 		if (store.getString(P_TOMCAT_VERSION) == null || store.getString(P_TOMCAT_VERSION).length() == 0) {
 			store.setValue(P_TOMCAT_VERSION, "6");
 		}
-		
+
+		if (store.getString(P_MONGO_SESSION_HOST) == null || store.getString(P_MONGO_SESSION_HOST).length() == 0) {
+			store.setValue(P_MONGO_SESSION_HOST, "corporate-db");
+		}
 	}
 	
 	/**
@@ -115,6 +139,12 @@ public class WTFPreferences extends FieldEditorPreferencePage implements IWorkbe
 		
 		clusterSessionMongo = new BooleanFieldEditor(P_CLUSTER_SESSION_MONGO, "Session en cluster mongo:", getFieldEditorParent());
 		addField(clusterSessionMongo);
+		
+		mongosessionhost = new StringFieldEditor(P_MONGO_SESSION_HOST, "Host de mongo:", getFieldEditorParent());
+		addField(mongosessionhost);
+		
+		homeOffice = new BooleanFieldEditor(P_HOME_OFFICE, "Home office:", getFieldEditorParent());
+		addField(homeOffice);
 	}
 
 
@@ -138,6 +168,12 @@ public class WTFPreferences extends FieldEditorPreferencePage implements IWorkbe
 		
 		clusterSessionMongo.store();
 		this.getPreferenceStore().setValue(P_CLUSTER_SESSION_MONGO, clusterSessionMongo.getBooleanValue());
+		
+		mongosessionhost.store();
+		this.getPreferenceStore().setValue(P_MONGO_SESSION_HOST, mongosessionhost.getStringValue());
+		
+		homeOffice.store();
+		this.getPreferenceStore().setValue(P_HOME_OFFICE, homeOffice.getBooleanValue());
 		return true;
 	}
 

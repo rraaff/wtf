@@ -48,6 +48,9 @@ import wtfplugin.preferences.WTFPreferences;
 
 public class LaunchTomcat6 {
 	
+	public static String HTTP = "<Connector port=\"@httpport@\" maxHttpHeaderSize=\"8192\" maxThreads=\"150\" minSpareThreads=\"1\" maxSpareThreads=\"10\" enableLookups=\"false\" redirectPort=\"8443\" acceptCount=\"100\" connectionTimeout=\"20000\" disableUploadTimeout=\"true\" maxPostSize=\"0\"/>";
+	public static String HTTPS = "<Connector port=\"@httpsport@\" maxThreads=\"200\" scheme=\"https\" secure=\"true\" SSLEnabled=\"true\" keystoreFile=\"${user.home}/.keystoreWTF\" keystorePass=\"changeit\" clientAuth=\"false\" sslProtocol=\"TLS\"/>";
+	
 
 	public LaunchTomcat6() {
 	}
@@ -122,17 +125,24 @@ public class LaunchTomcat6 {
 		// Excribo el context.xml
 		File contextDir = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable()).toFile();
 		
-		if (WTFPreferences.clusterSessionMongo()) {
-			org.apache.commons.io.FileUtils.deleteQuietly(new File(contextDir + "/conf/context.xml"));
-			if (LaunchTomcat.contextxml== null) {
-				InputStream is = LaunchTomcat6.class.getResourceAsStream("context.xml");
-				String tempServer = IOUtils.toString(is);
-				LaunchTomcat.contextxml = tempServer;
-				is.close();
+		if (!WTFPreferences.homeOffice()) {
+			if (WTFPreferences.clusterSessionMongo()) {
+				org.apache.commons.io.FileUtils.deleteQuietly(new File(contextDir + "/conf/context.xml"));
+				if (LaunchTomcat.contextxml== null) {
+					InputStream is = LaunchTomcat6.class.getResourceAsStream("context.xml");
+					String tempServer = IOUtils.toString(is);
+					LaunchTomcat.contextxml = tempServer;
+					is.close();
+				}
+				String newTempContext = LaunchTomcat.contextxml.replace("@mongostore@", WTFPreferences.getUsername());
+				newTempContext = newTempContext.replace("@mongosessionhost@", WTFPreferences.getMongosessionhosts());
+				File fileContext = new File(contextDir + "/conf/context.xml");
+				org.apache.commons.io.FileUtils.writeStringToFile(fileContext, newTempContext);
+			} else {
+				restoreContext(contextDir);
 			}
-			String newTempContext = LaunchTomcat.contextxml.replace("@mongostore@", WTFPreferences.getUsername());
-			File fileContext = new File(contextDir + "/conf/context.xml");
-			org.apache.commons.io.FileUtils.writeStringToFile(fileContext, newTempContext);
+		} else {
+			restoreContext(contextDir);
 		}
 		
 		// Primero escribo el server xml
@@ -146,8 +156,18 @@ public class LaunchTomcat6 {
 		String newTempServer = LaunchTomcat.serverxml.replace("@contextpath@", webappname);
 		newTempServer = newTempServer.replace("@appbase@", appBase);
 		newTempServer = newTempServer.replace("@serverport@", serverPort);
-		newTempServer = newTempServer.replace("@httpport@", port);
-		newTempServer = newTempServer.replace("@httpsport@", httpsPort);
+		if (!port.equals("")) {
+			String repl = HTTP.replace("@httpport@", port);
+			newTempServer = newTempServer.replace("@HTTPCONNECTOR@", repl);
+		} else {
+			newTempServer = newTempServer.replace("@HTTPCONNECTOR@", "");
+		}
+		if (!httpsPort.equals("")) {
+			String repl = HTTPS.replace("@httpsport@", httpsPort);
+			newTempServer = newTempServer.replace("@HTTPSCONNECTOR@", repl);
+		} else {
+			newTempServer = newTempServer.replace("@HTTPSCONNECTOR@", "");
+		}
 		newTempServer = newTempServer.replace("@docbase@", docbase);
 		newTempServer = newTempServer.replace("@workdir@", workdir);
 		newTempServer = newTempServer.replace("@contextcontent@", contextContent);	
@@ -196,6 +216,11 @@ public class LaunchTomcat6 {
 			jvmArgsParams = "";
 		}
 		
+		if (WTFPreferences.homeOffice()) {
+			jvmArgsParams = StringUtils.replace(jvmArgsParams, "active=localhost","active=rc");
+			jvmArgsParams = StringUtils.replace(jvmArgsParams, "jdbc:mysql","DUMMY");
+		}
+		
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, classpath);
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, false);
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, "-Djava.endorsed.dirs=\"..\\common\\endorsed\""
@@ -207,6 +232,21 @@ public class LaunchTomcat6 {
 		ILaunchConfiguration configuration = workingCopy.doSave();
 		DebugUITools.launch(configuration, ILaunchManager.DEBUG_MODE);
 	}
+
+	private static void restoreContext(File contextDir) {
+		try {
+			org.apache.commons.io.FileUtils.deleteQuietly(new File(contextDir + "/conf/context.xml"));
+			InputStream is = LaunchTomcat6.class.getResourceAsStream("contextHomeOffice.xml");
+			String newTempContext = IOUtils.toString(is);
+			is.close();
+			File fileContext = new File(contextDir + "/conf/context.xml");
+			org.apache.commons.io.FileUtils.writeStringToFile(fileContext, newTempContext);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
 
 	public static void addToClasspath( List classpath, IJavaProject javaProject) throws JavaModelException, CoreException {
 		IClasspathEntry[] entries = javaProject.getRawClasspath(); 
