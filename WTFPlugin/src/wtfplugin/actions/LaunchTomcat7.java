@@ -52,7 +52,7 @@ public class LaunchTomcat7 {
 	public static void launchTomcat(IProject project, String webappname, String port, String httpsPort, String serverPort, String contextContent, String jvmArgs) throws CoreException, IOException, JavaModelException {
 		
 		IProcess process= DebugUITools.getCurrentProcess();
-		if (process != null && process.getLaunch().getLaunchConfiguration().getName().equals("Start-" + webappname.substring(1))) {
+		if (process != null && process.getLaunch().getLaunchConfiguration().getName().equals(LaunchTomcat9.getLaunchName(project))) {
 			process.terminate();
 		}
 			
@@ -63,22 +63,22 @@ public class LaunchTomcat7 {
 		ILaunchConfiguration[] configurations = manager.getLaunchConfigurations(type);
 		for (int i = 0; i < configurations.length; i++) {
 			ILaunchConfiguration configuration = configurations[i];
-			if (configuration.getName().equals("Start-" + webappname.substring(1))) {
+			if (configuration.getName().equals(LaunchTomcat9.getLaunchName(project))) {
 				configuration.delete();
 				break;
 			}
 		}
 		IVMInstall jre = JavaRuntime.getDefaultVMInstall();
 		File jdkHome = jre.getInstallLocation();
-		ILaunchConfigurationWorkingCopy workingCopy = type.newInstance(null, "Start-" + webappname.substring(1));
+		ILaunchConfigurationWorkingCopy workingCopy = type.newInstance(null, LaunchTomcat9.getLaunchName(project));
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_INSTALL_NAME, jre.getName());
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_INSTALL_TYPE, jre.getVMInstallType().getId());
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, "org.apache.catalina.startup.Bootstrap");
-		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, "-config "+System.getProperty("java.io.tmpdir") + "/temp_server.xml"+" start");
+		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, "-config "+System.getProperty("java.io.tmpdir") + "/"+LaunchTomcat9.getLaunchName(project)+"_server.xml"+" start");
 		IPath toolsPath = new Path(jdkHome.getAbsolutePath()).append("lib").append("tools.jar");
 		IRuntimeClasspathEntry toolsEntry = JavaRuntime.newArchiveRuntimeClasspathEntry(toolsPath);
 		toolsEntry.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
-		IPath bootstrapPath = new Path(WTFPreferences.getTomcatVariable()).append("bin").append("bootstrap.jar");
+		IPath bootstrapPath = new Path(WTFPreferences.getTomcatVariable("7")).append("bin").append("bootstrap.jar");
 		IRuntimeClasspathEntry bootstrapEntry = JavaRuntime.newVariableRuntimeClasspathEntry(bootstrapPath);
 		bootstrapEntry.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
 		IPath systemLibsPath = new Path(JavaRuntime.JRE_CONTAINER);
@@ -119,7 +119,7 @@ public class LaunchTomcat7 {
 		org.apache.commons.io.FileUtils.writeByteArrayToFile(keystoreFile, LaunchTomcat.keystore);
 		
 		// Excribo el context.xml
-		File contextDir = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable()).toFile();
+		File contextDir = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable("7")).toFile();
 		if (WTFPreferences.clusterSessionMongo()) {
 			org.apache.commons.io.FileUtils.deleteQuietly(new File(contextDir + "/conf/context.xml"));
 			if (LaunchTomcat.contextxml== null) {
@@ -135,7 +135,7 @@ public class LaunchTomcat7 {
 			org.apache.commons.io.FileUtils.writeStringToFile(fileContext, newTempContext);
 		}
 		// Primero escribo el server xml
-		org.apache.commons.io.FileUtils.deleteQuietly(new File(System.getProperty("java.io.tmpdir") + "/temp_server.xml"));
+		org.apache.commons.io.FileUtils.deleteQuietly(new File(System.getProperty("java.io.tmpdir") + "/"+LaunchTomcat9.getLaunchName(project)+"_server.xml"));
 //		if (serverxml == null) {
 		{
 			InputStream is = LaunchTomcat7.class.getResourceAsStream("server.xml");
@@ -163,11 +163,11 @@ public class LaunchTomcat7 {
 		newTempServer = newTempServer.replace("@workdir@", workdir);
 		newTempServer = newTempServer.replace("@contextcontent@", contextContent);	
 		
-		File f = new File(System.getProperty("java.io.tmpdir") + "/temp_server.xml");
+		File f = new File(System.getProperty("java.io.tmpdir") + "/"+LaunchTomcat9.getLaunchName(project)+"_server.xml");
 		org.apache.commons.io.FileUtils.writeStringToFile(f, newTempServer);
 		
 		// copio las librerias de mongo si no estan
-		File mongoStore = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable()).append("lib").append("mongo-store-proxy-1.7.jar").toFile();
+		File mongoStore = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable("7")).append("lib").append("mongo-store-proxy-1.7.jar").toFile();
 		if (!mongoStore.exists()) {
 			InputStream is = LaunchTomcat.class.getResourceAsStream("mongo-store-proxy-1.7.jar");
 			FileOutputStream fout= new FileOutputStream(mongoStore);
@@ -175,7 +175,7 @@ public class LaunchTomcat7 {
 			is.close();
 			fout.close();
 		}
-		File mongoDriver = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable()).append("lib").append("mongo-java-driver-2.10.1.jar").toFile();
+		File mongoDriver = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable("7")).append("lib").append("mongo-java-driver-2.10.1.jar").toFile();
 		if (!mongoDriver.exists()) {
 			InputStream is = LaunchTomcat7.class.getResourceAsStream("mongo-java-driver-2.10.1.jar");
 			FileOutputStream fout= new FileOutputStream(mongoDriver);
@@ -210,7 +210,7 @@ public class LaunchTomcat7 {
 				+ "-Dcatalina.base=\"..\"" + "-Dcatalina.home=\"..\"" + "-Djava.io.tmpdir=\"..\\temp\" " + (jvmArgsParams));
 		
 		
-		File workingDir = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable()).append("bin").toFile();
+		File workingDir = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable("7")).append("bin").toFile();
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_WORKING_DIRECTORY, workingDir.getAbsolutePath());
 		ILaunchConfiguration configuration = workingCopy.doSave();
 		DebugUITools.launch(configuration, ILaunchManager.DEBUG_MODE);
@@ -236,13 +236,13 @@ public class LaunchTomcat7 {
 	}
 	
 	public static void addTomcatBinJarToClasspath(List classpath, String jar) throws CoreException {
-		IPath jspapijar = new Path(WTFPreferences.getTomcatVariable()).append("bin").append(jar);
+		IPath jspapijar = new Path(WTFPreferences.getTomcatVariable("7")).append("bin").append(jar);
 		IRuntimeClasspathEntry jspapijarEntry = JavaRuntime.newVariableRuntimeClasspathEntry(jspapijar);
 		classpath.add(jspapijarEntry.getMemento());
 	}
 	
 	public static void addTomcatLibJarToClasspath(List classpath, String jar) throws CoreException {
-		IPath jspapijar = new Path(WTFPreferences.getTomcatVariable()).append("lib").append(jar);
+		IPath jspapijar = new Path(WTFPreferences.getTomcatVariable("7")).append("lib").append(jar);
 		IRuntimeClasspathEntry jspapijarEntry = JavaRuntime.newVariableRuntimeClasspathEntry(jspapijar);
 		classpath.add(jspapijarEntry.getMemento());
 	}

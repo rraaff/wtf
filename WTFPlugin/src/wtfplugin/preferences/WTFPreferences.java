@@ -63,8 +63,8 @@ public class WTFPreferences extends FieldEditorPreferencePage implements IWorkbe
 	
 	public static String getTomcatVersion() {
 		String result = Activator.getDefault().getPreferenceStore().getString(WTFPreferences.P_TOMCAT_VERSION);
-		if (!"7".equals(result)) {
-			result = "6";
+		if (StringUtils.isEmpty(result) || !StringUtils.isNumeric(result)) {
+			result = "6";			
 		}
 		return result;
 	}
@@ -102,6 +102,10 @@ public class WTFPreferences extends FieldEditorPreferencePage implements IWorkbe
 	
 	public static String getTomcatVariable() {
 		return "TOMCAT" + getTomcatVersion() + "_HOME";
+	}
+	
+	public static String getTomcatVariable(String version) {
+		return "TOMCAT" + version + "_HOME";
 	}
 
 	/**

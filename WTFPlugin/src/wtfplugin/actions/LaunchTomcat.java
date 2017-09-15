@@ -78,7 +78,7 @@ public class LaunchTomcat extends ActionDelegate implements IWorkbenchWindowActi
 										is = file.getContents();
 										props.load(is);
 										if ("true".equals(props.getProperty("default", "true"))) {
-											LaunchTomcat.launchTomcat(pro, props.getProperty("contextPath", "/" + pro.getName()), props.getProperty("port", "8080"), props.getProperty("httpsPort", "8443"),props.getProperty("serverport", "8208"), props.getProperty("contextcontent",""), props.getProperty("jvmargs",""));
+											LaunchTomcat.launchTomcat(pro, props.getProperty("contextPath", "/" + pro.getName()), props.getProperty("port", "8080"), props.getProperty("httpsPort", "8443"),props.getProperty("serverport", "8208"), props.getProperty("contextcontent",""), props.getProperty("jvmargs",""), props.getProperty("tomcatVersion", WTFPreferences.getTomcatVersion()));
 											return;
 										}
 								}
@@ -95,31 +95,39 @@ public class LaunchTomcat extends ActionDelegate implements IWorkbenchWindowActi
 					}
 			}
 			
-			String webappname = "/corporate";
-			IProject project = root.getProject("corporate");
-			File file = null;
-			if (project == null || !project.exists() || !project.isAccessible() || !project.isOpen()) {
-				project = root.getProject("marcablanca-service-web");
-				webappname = "/marcablanca-service-web";
-			}  
-			if (project == null || !project.exists() || !project.isAccessible() || !project.isOpen()) {
-				project = root.getProject("marcablanca");
-				webappname = "/marcablanca";
-			}
-			String port ="8080";
-			String httpsPort ="8443";
-			String serverPort = "8208";
-			launchTomcat(project, webappname, port, httpsPort, serverPort, "", "");
+//			String webappname = "/corporate";
+//			IProject project = root.getProject("corporate");
+//			File file = null;
+//			if (project == null || !project.exists() || !project.isAccessible() || !project.isOpen()) {
+//				project = root.getProject("marcablanca-service-web");
+//				webappname = "/marcablanca-service-web";
+//			}  
+//			if (project == null || !project.exists() || !project.isAccessible() || !project.isOpen()) {
+//				project = root.getProject("marcablanca");
+//				webappname = "/marcablanca";
+//			}
+//			String port ="8080";
+//			String httpsPort ="8443";
+//			String serverPort = "8208";
+//			launchTomcat(project, webappname, port, httpsPort, serverPort, "", "");
 		} catch (Exception e) {
 			Activator.showException(e);
 		}
 	}
 
-	public static void launchTomcat(IProject project, String webappname, String port, String httpsPort, String serverPort, String contextContent, String jvmArgs) throws CoreException, IOException, JavaModelException {
-		if ("7".equals(WTFPreferences.getTomcatVersion())) {
-			LaunchTomcat7.launchTomcat(project, webappname, port, httpsPort, serverPort, contextContent, jvmArgs);
+	public static void launchTomcat(IProject project, String webappname, String port, String httpsPort, String serverPort, String contextContent, String jvmArgs, String tomcatVersion) throws CoreException, IOException, JavaModelException {
+		if ("9".equals(tomcatVersion)) {
+			LaunchTomcat9.launchTomcat(project, webappname, port, httpsPort, serverPort, contextContent, jvmArgs);
 		} else {
-			LaunchTomcat6.launchTomcat(project, webappname, port, httpsPort, serverPort, contextContent, jvmArgs);
+			if ("8".equals(tomcatVersion)) {
+				LaunchTomcat8.launchTomcat(project, webappname, port, httpsPort, serverPort, contextContent, jvmArgs);
+			} else {
+				if ("7".equals(tomcatVersion)) {
+					LaunchTomcat7.launchTomcat(project, webappname, port, httpsPort, serverPort, contextContent, jvmArgs);
+				} else {
+					LaunchTomcat6.launchTomcat(project, webappname, port, httpsPort, serverPort, contextContent, jvmArgs);
+				}
+			}
 		}
 	}
 

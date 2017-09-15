@@ -48,8 +48,8 @@ import wtfplugin.preferences.WTFPreferences;
 
 public class LaunchTomcat6 {
 	
-	public static String HTTP = "<Connector port=\"@httpport@\" maxHttpHeaderSize=\"8192\" maxThreads=\"150\" minSpareThreads=\"1\" maxSpareThreads=\"10\" enableLookups=\"false\" redirectPort=\"8443\" acceptCount=\"100\" connectionTimeout=\"20000\" disableUploadTimeout=\"true\" maxPostSize=\"0\"/>";
-	public static String HTTPS = "<Connector port=\"@httpsport@\" maxThreads=\"200\" scheme=\"https\" secure=\"true\" SSLEnabled=\"true\" keystoreFile=\"${user.home}/.keystoreWTF\" keystorePass=\"changeit\" clientAuth=\"false\" sslProtocol=\"TLS\"/>";
+	public static String HTTP = "<Connector port=\"@httpport@\" maxHttpHeaderSize=\"8192\" maxThreads=\"150\" minSpareThreads=\"1\" maxSpareThreads=\"10\" enableLookups=\"false\" redirectPort=\"8443\" acceptCount=\"100\" connectionTimeout=\"20000\" disableUploadTimeout=\"true\" maxPostSize=\"0\" URIEncoding=\"UTF-8\"/>";
+	public static String HTTPS = "<Connector port=\"@httpsport@\" maxThreads=\"200\" scheme=\"https\" secure=\"true\" SSLEnabled=\"true\" keystoreFile=\"${user.home}/.keystoreWTF\" keystorePass=\"changeit\" clientAuth=\"false\" sslProtocol=\"TLS\" URIEncoding=\"UTF-8\"/>";
 	
 
 	public LaunchTomcat6() {
