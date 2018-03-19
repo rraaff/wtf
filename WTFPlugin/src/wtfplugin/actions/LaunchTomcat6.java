@@ -85,7 +85,7 @@ public class LaunchTomcat6 {
 		IPath toolsPath = new Path(jdkHome.getAbsolutePath()).append("lib").append("tools.jar");
 		IRuntimeClasspathEntry toolsEntry = JavaRuntime.newArchiveRuntimeClasspathEntry(toolsPath);
 		toolsEntry.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
-		IPath bootstrapPath = new Path(WTFPreferences.getTomcatVariable()).append("bin").append("bootstrap.jar");
+		IPath bootstrapPath = new Path(WTFPreferences.getTomcatVariable("6")).append("bin").append("bootstrap.jar");
 		IRuntimeClasspathEntry bootstrapEntry = JavaRuntime.newVariableRuntimeClasspathEntry(bootstrapPath);
 		bootstrapEntry.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
 		IPath systemLibsPath = new Path(JavaRuntime.JRE_CONTAINER);
@@ -123,7 +123,7 @@ public class LaunchTomcat6 {
 		org.apache.commons.io.FileUtils.writeByteArrayToFile(keystoreFile, LaunchTomcat.keystore);
 		
 		// Excribo el context.xml
-		File contextDir = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable()).toFile();
+		File contextDir = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable("6")).toFile();
 		
 		if (!WTFPreferences.homeOffice()) {
 			if (WTFPreferences.clusterSessionMongo()) {
@@ -188,9 +188,9 @@ public class LaunchTomcat6 {
 			is.close();
 			fout.close();
 		}
-		File mongoDriver = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable()).append("lib").append("mongo-java-driver-2.10.1.jar").toFile();
+		File mongoDriver = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable()).append("lib").append("mongo-java-driver-3.2.1.jar").toFile();
 		if (!mongoDriver.exists()) {
-			InputStream is = LaunchTomcat6.class.getResourceAsStream("mongo-java-driver-2.10.1.jar");
+			InputStream is = LaunchTomcat6.class.getResourceAsStream("mongo-java-driver-3.2.1.jar");
 			FileOutputStream fout= new FileOutputStream(mongoDriver);
 			IOUtils.copy(is, fout);
 			is.close();
@@ -268,7 +268,7 @@ public class LaunchTomcat6 {
 	}
 
 	public static void addTomcatJarToClasspath(List classpath, String jar) throws CoreException {
-		IPath jspapijar = new Path(WTFPreferences.getTomcatVariable()).append("lib").append(jar);
+		IPath jspapijar = new Path(WTFPreferences.getTomcatVariable("6")).append("lib").append(jar);
 		IRuntimeClasspathEntry jspapijarEntry = JavaRuntime.newVariableRuntimeClasspathEntry(jspapijar);
 		classpath.add(jspapijarEntry.getMemento());
 	}

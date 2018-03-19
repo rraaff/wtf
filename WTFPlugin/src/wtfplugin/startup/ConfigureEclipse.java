@@ -117,21 +117,21 @@ public class ConfigureEclipse implements IStartup {
 						}
 					}
 					
-					if (!errors.isEmpty()) { // si hay errores los muestro
-							final String PID = Activator.PLUGIN_ID;
-						   final MultiStatus info = new MultiStatus(PID, 1, "Se han encontrado errores de seteos del eclipse para desarrollo de Corporate", null);
-						   for (int i = 0; i < errors.size(); i++) {
-							   info.add(new Status(IStatus.ERROR, PID, 1, errors.get(i)[0] + " - " + errors.get(i)[1], null));
-						   }
-						   infoFinal = info;
-						   Display.getDefault().syncExec( new Runnable() {
-								public void run() {
-									// Aca setear en un label contribution al status bar el tipo de error, que on click lo vuelva a mostrar, con un icono de ok, error, fatal
-								   ErrorDialog.openError(Activator.getDefault().getWorkbench()
-											.getWorkbenchWindows()[0].getShell(), "Errores de workspace de Corporate", null, infoFinal);
-								}
-						  });
-					} 
+//					if (!errors.isEmpty()) { // si hay errores los muestro
+//							final String PID = Activator.PLUGIN_ID;
+//						   final MultiStatus info = new MultiStatus(PID, 1, "Se han encontrado errores de seteos del eclipse para desarrollo de Corporate", null);
+//						   for (int i = 0; i < errors.size(); i++) {
+//							   info.add(new Status(IStatus.ERROR, PID, 1, errors.get(i)[0] + " - " + errors.get(i)[1], null));
+//						   }
+//						   infoFinal = info;
+//						   Display.getDefault().syncExec( new Runnable() {
+//								public void run() {
+//									// Aca setear en un label contribution al status bar el tipo de error, que on click lo vuelva a mostrar, con un icono de ok, error, fatal
+//								   ErrorDialog.openError(Activator.getDefault().getWorkbench()
+//											.getWorkbenchWindows()[0].getShell(), "Errores de workspace de Corporate", null, infoFinal);
+//								}
+//						  });
+//					} 
 				} catch (CoreException e) {
 					Activator.showException(e);
 				} finally {

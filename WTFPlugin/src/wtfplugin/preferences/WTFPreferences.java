@@ -114,10 +114,10 @@ public class WTFPreferences extends FieldEditorPreferencePage implements IWorkbe
 	private void initializeDefaults() {
 		IPreferenceStore store = this.getPreferenceStore();
 		if (store.getString(P_USERNAME) == null || store.getString(P_USERNAME).length() == 0) {
-			store.setValue(P_USERNAME, "corp_" + System.getProperty("user.name"));
+			store.setValue(P_USERNAME, "sc_ic");
 		}
 		if (store.getString(P_TOMCAT_VERSION) == null || store.getString(P_TOMCAT_VERSION).length() == 0) {
-			store.setValue(P_TOMCAT_VERSION, "6");
+			store.setValue(P_TOMCAT_VERSION, "7");
 		}
 
 		if (store.getString(P_MONGO_SESSION_HOST) == null || store.getString(P_MONGO_SESSION_HOST).length() == 0) {

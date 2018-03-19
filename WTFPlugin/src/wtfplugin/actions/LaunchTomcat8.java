@@ -42,10 +42,10 @@ import org.eclipse.ui.actions.ActionDelegate;
 import wtfplugin.Activator;
 import wtfplugin.preferences.WTFPreferences;
 
-public class LaunchTomcat7 {
+public class LaunchTomcat8 {
 	
 
-	public LaunchTomcat7() {
+	public LaunchTomcat8() {
 	}
 
 
@@ -78,7 +78,7 @@ public class LaunchTomcat7 {
 		IPath toolsPath = new Path(jdkHome.getAbsolutePath()).append("lib").append("tools.jar");
 		IRuntimeClasspathEntry toolsEntry = JavaRuntime.newArchiveRuntimeClasspathEntry(toolsPath);
 		toolsEntry.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
-		IPath bootstrapPath = new Path(WTFPreferences.getTomcatVariable("7")).append("bin").append("bootstrap.jar");
+		IPath bootstrapPath = new Path(WTFPreferences.getTomcatVariable("8")).append("bin").append("bootstrap.jar");
 		IRuntimeClasspathEntry bootstrapEntry = JavaRuntime.newVariableRuntimeClasspathEntry(bootstrapPath);
 		bootstrapEntry.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
 		IPath systemLibsPath = new Path(JavaRuntime.JRE_CONTAINER);
@@ -90,12 +90,15 @@ public class LaunchTomcat7 {
 
 		addTomcatBinJarToClasspath(classpath, "tomcat-juli.jar");
 		
-		File tomcatLib = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable("7")).append("lib").toFile();
+		File tomcatLib = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable("8")).append("lib").toFile();
 		for (String jarFile : tomcatLib.list()) {
 			if (jarFile.endsWith(".jar")) {
 				addTomcatLibJarToClasspath(classpath, jarFile);
 			}
 		}
+//		addTomcatLibJarToClasspath(classpath, "jsp-api.jar");
+//		addTomcatLibJarToClasspath(classpath, "el-api.jar");
+//		addTomcatLibJarToClasspath(classpath, "servlet-api.jar");
 		
 		if (project == null || !project.exists() || !project.isAccessible() || !project.isOpen()) {
 			Activator.showErrorMessage("Tomcat", "No se ha encontrado ningun projecto web");
@@ -114,7 +117,7 @@ public class LaunchTomcat7 {
 		// Borro el keystore viejo
 		org.apache.commons.io.FileUtils.deleteQuietly(new File(System.getProperty("user.home") + "/.keystoreWTF"));
 		if (LaunchTomcat.keystore == null) {
-			InputStream is = LaunchTomcat7.class.getResourceAsStream("keystoreWTF");
+			InputStream is = LaunchTomcat8.class.getResourceAsStream("keystoreWTF");
 			LaunchTomcat.keystore = IOUtils.toByteArray(is);
 			is.close();
 		}
@@ -122,11 +125,12 @@ public class LaunchTomcat7 {
 		org.apache.commons.io.FileUtils.writeByteArrayToFile(keystoreFile, LaunchTomcat.keystore);
 		
 		// Excribo el context.xml
-		File contextDir = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable("7")).toFile();
-		if (WTFPreferences.clusterSessionMongo()) {
+		File contextDir = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable("8")).toFile();
+		// no esta soportado por el momento
+		if (WTFPreferences.clusterSessionMongo() && false) {
 			org.apache.commons.io.FileUtils.deleteQuietly(new File(contextDir + "/conf/context.xml"));
 			if (LaunchTomcat.contextxml== null) {
-				InputStream is = LaunchTomcat7.class.getResourceAsStream("context.xml");
+				InputStream is = LaunchTomcat8.class.getResourceAsStream("context.xml");
 				String tempServer = IOUtils.toString(is);
 				LaunchTomcat.contextxml = tempServer;
 				is.close();
@@ -141,7 +145,7 @@ public class LaunchTomcat7 {
 		org.apache.commons.io.FileUtils.deleteQuietly(new File(System.getProperty("java.io.tmpdir") + "/"+LaunchTomcat9.getLaunchName(project)+"_server.xml"));
 //		if (serverxml == null) {
 		{
-			InputStream is = LaunchTomcat7.class.getResourceAsStream("server.xml");
+			InputStream is = LaunchTomcat8.class.getResourceAsStream("server.xml");
 			String tempServer = IOUtils.toString(is);
 			LaunchTomcat.serverxml = tempServer;
 			is.close();
@@ -169,22 +173,31 @@ public class LaunchTomcat7 {
 		File f = new File(System.getProperty("java.io.tmpdir") + "/"+LaunchTomcat9.getLaunchName(project)+"_server.xml");
 		org.apache.commons.io.FileUtils.writeStringToFile(f, newTempServer);
 		
-		// copio las librerias de mongo si no estan
-		File mongoStore = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable("7")).append("lib").append("mongo-store-proxy-1.7.3.jar").toFile();
-		if (!mongoStore.exists()) {
-			InputStream is = LaunchTomcat.class.getResourceAsStream("mongo-store-proxy-1.7.3.jar");
-			FileOutputStream fout= new FileOutputStream(mongoStore);
-			IOUtils.copy(is, fout);
-			is.close();
-			fout.close();
-		}
-		File mongoDriver = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable("7")).append("lib").append("mongo-java-driver-3.2.1.jar").toFile();
-		if (!mongoDriver.exists()) {
-			InputStream is = LaunchTomcat7.class.getResourceAsStream("mongo-java-driver-3.2.1.jar");
-			FileOutputStream fout= new FileOutputStream(mongoDriver);
-			IOUtils.copy(is, fout);
-			is.close();
-			fout.close();
+		// no esta soportado por el momento
+		File mongoStore = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable("8")).append("lib").append("mongo-store-proxy-1.8.jar").toFile();
+		File mongoDriver = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable("8")).append("lib").append("mongo-java-driver-3.2.1.jar").toFile();
+		if (WTFPreferences.clusterSessionMongo() && false) {
+			if (!mongoStore.exists()) {
+				InputStream is = LaunchTomcat.class.getResourceAsStream("mongo-store-proxy-1.8.jar");
+				FileOutputStream fout= new FileOutputStream(mongoStore);
+				IOUtils.copy(is, fout);
+				is.close();
+				fout.close();
+			}
+			if (!mongoDriver.exists()) {
+				InputStream is = LaunchTomcat8.class.getResourceAsStream("mongo-java-driver-3.2.1.jar");
+				FileOutputStream fout= new FileOutputStream(mongoDriver);
+				IOUtils.copy(is, fout);
+				is.close();
+				fout.close();
+			}
+		} else {
+			if (mongoStore.exists()) {
+				mongoStore.delete();
+			}
+			if (mongoDriver.exists()) {
+				mongoDriver.delete();
+			}
 		}
 		
 		IJavaProject javaProject = JavaCore.create(project);
@@ -213,7 +226,7 @@ public class LaunchTomcat7 {
 				+ "-Dcatalina.base=\"..\"" + "-Dcatalina.home=\"..\"" + "-Djava.io.tmpdir=\"..\\temp\" " + (jvmArgsParams));
 		
 		
-		File workingDir = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable("7")).append("bin").toFile();
+		File workingDir = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable("8")).append("bin").toFile();
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_WORKING_DIRECTORY, workingDir.getAbsolutePath());
 		ILaunchConfiguration configuration = workingCopy.doSave();
 		DebugUITools.launch(configuration, ILaunchManager.DEBUG_MODE);
@@ -239,13 +252,13 @@ public class LaunchTomcat7 {
 	}
 	
 	public static void addTomcatBinJarToClasspath(List classpath, String jar) throws CoreException {
-		IPath jspapijar = new Path(WTFPreferences.getTomcatVariable("7")).append("bin").append(jar);
+		IPath jspapijar = new Path(WTFPreferences.getTomcatVariable("8")).append("bin").append(jar);
 		IRuntimeClasspathEntry jspapijarEntry = JavaRuntime.newVariableRuntimeClasspathEntry(jspapijar);
 		classpath.add(jspapijarEntry.getMemento());
 	}
 	
 	public static void addTomcatLibJarToClasspath(List classpath, String jar) throws CoreException {
-		IPath jspapijar = new Path(WTFPreferences.getTomcatVariable("7")).append("lib").append(jar);
+		IPath jspapijar = new Path(WTFPreferences.getTomcatVariable("8")).append("lib").append(jar);
 		IRuntimeClasspathEntry jspapijarEntry = JavaRuntime.newVariableRuntimeClasspathEntry(jspapijar);
 		classpath.add(jspapijarEntry.getMemento());
 	}
