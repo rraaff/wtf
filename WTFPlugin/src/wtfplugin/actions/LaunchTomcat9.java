@@ -51,6 +51,11 @@ public class LaunchTomcat9 {
 			String serverPort, String docbase, String contextContent, String jvmArgs)
 			throws CoreException, IOException, JavaModelException {
 
+		if (JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable("9")) == null) {
+			Activator.showErrorMessage("Tomcat", "No se ha encontrado la variable TOMCAT9_HOME");
+			return;
+		}
+		
 		IProcess process = DebugUITools.getCurrentProcess();
 		if (process != null && process.getLaunch().getLaunchConfiguration().getName().equals(getLaunchName(project))) {
 			process.terminate();
@@ -94,10 +99,6 @@ public class LaunchTomcat9 {
 
 		addTomcatBinJarToClasspath(classpath, "tomcat-juli.jar");
 
-		if (JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable("9")) == null) {
-			Activator.showErrorMessage("Tomcat", "No se ha encontrado la variable TOMCAT9_HOME");
-			return;
-		}
 		File tomcatLib = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable("9")).append("lib").toFile();
 		for (String jarFile : tomcatLib.list()) {
 			if (jarFile.endsWith(".jar")) {
@@ -110,7 +111,7 @@ public class LaunchTomcat9 {
 			return;
 		}
 
-		file = project.getRawLocation().toFile();
+		file = ResourcesPlugin.getWorkspace().getRoot().getRawLocation().toFile();
 		String docbaseAbsolute = file + docbase ;
 		String appbase = new File(docbaseAbsolute).getParentFile().getAbsolutePath();
 		String workdir = docbaseAbsolute + "/work";

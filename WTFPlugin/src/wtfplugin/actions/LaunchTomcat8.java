@@ -54,6 +54,11 @@ public class LaunchTomcat8 {
 
 	public static void launchTomcat(IProject project, String webappname, String port, String httpsPort, String serverPort, String docbase, String contextContent, String jvmArgs) throws CoreException, IOException, JavaModelException {
 		
+		if (JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable("8")) == null) {
+			Activator.showErrorMessage("Tomcat", "No se ha encontrado la variable TOMCAT8_HOME");
+			return;
+		}
+		
 		IProcess process= DebugUITools.getCurrentProcess();
 		if (process != null && process.getLaunch().getLaunchConfiguration().getName().equals(LaunchTomcat9.getLaunchName(project))) {
 			process.terminate();
@@ -93,10 +98,7 @@ public class LaunchTomcat8 {
 
 		addTomcatBinJarToClasspath(classpath, "tomcat-juli.jar");
 		
-		if (JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable("8")) == null) {
-			Activator.showErrorMessage("Tomcat", "No se ha encontrado la variable TOMCAT8_HOME");
-			return;
-		}
+
 		File tomcatLib = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable("8")).append("lib").toFile();
 		for (String jarFile : tomcatLib.list()) {
 			if (jarFile.endsWith(".jar")) {
@@ -112,8 +114,7 @@ public class LaunchTomcat8 {
 			return;
 		}
 		
-		
-		file = project.getRawLocation().toFile();
+		file = ResourcesPlugin.getWorkspace().getRoot().getRawLocation().toFile();
 
 		String fulldocbase = file + docbase;
 		String appbase = new File(fulldocbase).getParentFile().getAbsolutePath();
