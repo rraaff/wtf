@@ -10,19 +10,15 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.layout.RowData;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.menus.WorkbenchWindowControlContribution;
 
-import wtfplugin.Activator;
-import wtfplugin.builder.ResourceBundleBuilder;
-
 import com.swtdesigner.ResourceManager;
+
+import wtfplugin.Activator;
 
 public class WTFStatusBar extends WorkbenchWindowControlContribution {
 	
@@ -63,32 +59,6 @@ public class WTFStatusBar extends WorkbenchWindowControlContribution {
 
 	@Override
 	protected Control createControl(Composite parent) {
-		comp = new Composite(parent, SWT.NONE);
-		comp.setSize(120, 25);
-		// Give some room around the control
-		
-		RowLayout rowLayout = new RowLayout();
-		rowLayout.wrap = false;
-		rowLayout.pack = true;
-		rowLayout.justify = true;
-		rowLayout.type = SWT.HORIZONTAL;
-		rowLayout.marginTop = 0;
-		rowLayout.marginBottom = 0;
-		
-		comp.setLayout(rowLayout);
-
-		label = new CLabel(comp, SWT.CENTER);
-		label.setVisible(true);
-		setImage();
-		label.setText("RB");
-		
-		label.addMouseListener(new MouseListener() {
-			public void mouseUp(MouseEvent e) {
-				ResourceBundleBuilder.showSuspectedErrors();
-			}
-			public void mouseDoubleClick(MouseEvent e) {}
-			public void mouseDown(MouseEvent e) {}
-		});
 		
 		refresh();
 		

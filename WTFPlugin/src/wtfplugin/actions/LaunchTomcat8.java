@@ -44,12 +44,15 @@ import wtfplugin.preferences.WTFPreferences;
 
 public class LaunchTomcat8 {
 	
+	public static String HTTP = "<Connector port=\"@httpport@\" maxHttpHeaderSize=\"8192\" maxThreads=\"150\" minSpareThreads=\"1\" maxSpareThreads=\"10\" enableLookups=\"false\" redirectPort=\"8443\" acceptCount=\"100\" connectionTimeout=\"20000\" disableUploadTimeout=\"true\" maxPostSize=\"0\" URIEncoding=\"UTF-8\"/>";
+	public static String HTTPS = "<Connector port=\"@httpsport@\" maxThreads=\"200\" scheme=\"https\" secure=\"true\" SSLEnabled=\"true\" keystoreFile=\"${user.home}/.keystoreWTF\" keystorePass=\"changeit\" clientAuth=\"false\" sslProtocol=\"TLS\" URIEncoding=\"UTF-8\"/>";
+	
 
 	public LaunchTomcat8() {
 	}
 
 
-	public static void launchTomcat(IProject project, String webappname, String port, String httpsPort, String serverPort, String contextContent, String jvmArgs) throws CoreException, IOException, JavaModelException {
+	public static void launchTomcat(IProject project, String webappname, String port, String httpsPort, String serverPort, String docbase, String contextContent, String jvmArgs) throws CoreException, IOException, JavaModelException {
 		
 		IProcess process= DebugUITools.getCurrentProcess();
 		if (process != null && process.getLaunch().getLaunchConfiguration().getName().equals(LaunchTomcat9.getLaunchName(project))) {
@@ -90,6 +93,10 @@ public class LaunchTomcat8 {
 
 		addTomcatBinJarToClasspath(classpath, "tomcat-juli.jar");
 		
+		if (JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable("8")) == null) {
+			Activator.showErrorMessage("Tomcat", "No se ha encontrado la variable TOMCAT8_HOME");
+			return;
+		}
 		File tomcatLib = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable("8")).append("lib").toFile();
 		for (String jarFile : tomcatLib.list()) {
 			if (jarFile.endsWith(".jar")) {
@@ -106,13 +113,11 @@ public class LaunchTomcat8 {
 		}
 		
 		
-		file = project.getFolder("src").getRawLocation().toFile().getParentFile();
-		String appBase = file.toString();
-		
-		String docBase = file.toString();
-		
-		String docbase =docBase + "/src/main/webapp";
-		String workdir =docBase + "/src/main/webapp/work";
+		file = project.getRawLocation().toFile();
+
+		String fulldocbase = file + docbase;
+		String appbase = new File(fulldocbase).getParentFile().getAbsolutePath();
+		String workdir = fulldocbase + "/work";
 		
 		// Borro el keystore viejo
 		org.apache.commons.io.FileUtils.deleteQuietly(new File(System.getProperty("user.home") + "/.keystoreWTF"));
@@ -152,53 +157,26 @@ public class LaunchTomcat8 {
 		}
 //		}
 		String newTempServer = LaunchTomcat.serverxml.replace("@contextpath@", webappname);
-		newTempServer = newTempServer.replace("@appbase@", appBase);
+		newTempServer = newTempServer.replace("@appbase@", appbase);
 		newTempServer = newTempServer.replace("@serverport@", serverPort);
 		if (!port.equals("")) {
-			String repl = LaunchTomcat6.HTTP.replace("@httpport@", port);
+			String repl = LaunchTomcat8.HTTP.replace("@httpport@", port);
 			newTempServer = newTempServer.replace("@HTTPCONNECTOR@", repl);
 		} else {
 			newTempServer = newTempServer.replace("@HTTPCONNECTOR@", "");
 		}
 		if (!httpsPort.equals("")) {
-			String repl = LaunchTomcat6.HTTPS.replace("@httpsport@", httpsPort);
+			String repl = LaunchTomcat8.HTTPS.replace("@httpsport@", httpsPort);
 			newTempServer = newTempServer.replace("@HTTPSCONNECTOR@", repl);
 		} else {
 			newTempServer = newTempServer.replace("@HTTPSCONNECTOR@", "");
 		}
-		newTempServer = newTempServer.replace("@docbase@", docbase);
+		newTempServer = newTempServer.replace("@docbase@", fulldocbase);
 		newTempServer = newTempServer.replace("@workdir@", workdir);
 		newTempServer = newTempServer.replace("@contextcontent@", contextContent);	
 		
 		File f = new File(System.getProperty("java.io.tmpdir") + "/"+LaunchTomcat9.getLaunchName(project)+"_server.xml");
 		org.apache.commons.io.FileUtils.writeStringToFile(f, newTempServer);
-		
-		// no esta soportado por el momento
-		File mongoStore = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable("8")).append("lib").append("mongo-store-proxy-1.8.jar").toFile();
-		File mongoDriver = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable("8")).append("lib").append("mongo-java-driver-3.2.1.jar").toFile();
-		if (WTFPreferences.clusterSessionMongo() && false) {
-			if (!mongoStore.exists()) {
-				InputStream is = LaunchTomcat.class.getResourceAsStream("mongo-store-proxy-1.8.jar");
-				FileOutputStream fout= new FileOutputStream(mongoStore);
-				IOUtils.copy(is, fout);
-				is.close();
-				fout.close();
-			}
-			if (!mongoDriver.exists()) {
-				InputStream is = LaunchTomcat8.class.getResourceAsStream("mongo-java-driver-3.2.1.jar");
-				FileOutputStream fout= new FileOutputStream(mongoDriver);
-				IOUtils.copy(is, fout);
-				is.close();
-				fout.close();
-			}
-		} else {
-			if (mongoStore.exists()) {
-				mongoStore.delete();
-			}
-			if (mongoDriver.exists()) {
-				mongoDriver.delete();
-			}
-		}
 		
 		IJavaProject javaProject = JavaCore.create(project);
 		IRuntimeClasspathEntry projectOutputPath = JavaRuntime.newProjectRuntimeClasspathEntry(javaProject);
@@ -208,15 +186,7 @@ public class LaunchTomcat8 {
 		addToClasspath(classpath, javaProject);
 		
 		String jvmArgsParams = jvmArgs;
-		if (jvmArgsParams != null) {
-			int beginIndex = jvmArgsParams.indexOf(":3306/");
-			if (beginIndex != -1) {
-				beginIndex = beginIndex  + 6;
-				String first = jvmArgsParams.substring(0, beginIndex);
-				String second = jvmArgsParams.substring(jvmArgsParams.indexOf("?", beginIndex));
-				jvmArgsParams = first + WTFPreferences.getUsername() + second;
-			}
-		} else {
+		if (jvmArgsParams == null) {
 			jvmArgsParams = "";
 		}
 		

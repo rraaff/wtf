@@ -1,24 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-
- <extension
-       id="rbBuilder"
-       name="Builder para chequear los RB"
-       point="org.eclipse.core.resources.builders">
-    <builder hasNature="false">
-       <run class="wtfplugin.builder.ResourceBundleBuilder"/>
-    </builder>
- </extension>
- 
- <extension
-       id="confBuilder"
-       name="Builder para chequear la conf"
-       point="org.eclipse.core.resources.builders">
-    <builder hasNature="false">
-       <run class="wtfplugin.builder.ConfigurationBuilder"/>
-    </builder>
- </extension>
  
  <extension
          point="org.eclipse.ui.console.consoleFactories">
@@ -37,14 +19,6 @@
       </page>
    </extension>
  
- <extension
-       id="classpathVerifier"
-       name="Builder para el uso de clases persistentes"
-       point="org.eclipse.core.resources.builders">
-    <builder hasNature="false">
-       <run class="wtfplugin.builder.classpath.ClasspathVerifier"/>
-    </builder>
- </extension>
 
    <extension
          point="org.eclipse.ui.actionSets">
@@ -56,27 +30,6 @@
                icon="icons/link.gif"
                id="wtfplugin.actions.JarsToProjects"
                label="Convertir relaciones a projectos"
-               style="push"
-               toolbarPath="window/additions"/>
-               
-            <action      class="wtfplugin.actions.CommandToDB"
-               icon="icons/command-prompt.png"
-               id="wtfplugin.actions.CommandToDB"
-               label="Command contra la base"
-               style="push"
-               toolbarPath="window/additions"/>
-               
-            <action      class="wtfplugin.actions.RestoreDBFromRC"
-               icon="icons/data-backup-16.png"
-               id="wtfplugin.actions.RestoreDBFromRC"
-               label="Reestablece la base como la de RC"
-               style="push"
-               toolbarPath="window/additions"/>
-               
-            <action      class="wtfplugin.actions.CheckActualDBVersion"
-               icon="icons/database-check.gif"
-               id="wtfplugin.actions.CheckActualDBVersion"
-               label="Chequea la version actual"
                style="push"
                toolbarPath="window/additions"/>
 
@@ -91,106 +44,7 @@
       
                
             </extension>
-      
-      <extension
-         point="org.eclipse.ui.popupMenus">
-         
-         <objectContribution
-            objectClass="org.eclipse.core.resources.IResource"
-            nameFilter="*"
-            id="com.despegar">
-         <menu
-               label="&amp;Despegar"
-               path="additions"
-               id="com.despegar">
-            <separator
-                  name="group1">
-            </separator>
-         </menu>
-         </objectContribution>
-         
-         <objectContribution
-            objectClass="org.eclipse.core.resources.IResource"
-            nameFilter="*"
-            id="com.despegar.generateversion">
-         <action
-               class="wtfplugin.actions.NewVersion"
-               icon="icons/link.gif"
-               id="wtfplugin.actions.NewVersion"
-               label="Crear nueva version"
-               menubarPath="com.despegar/group1"
-               style="push"
-               enablesFor="1"
-               toolbarPath="window/additions">
-            <enablement>
-               <and>
-                  <objectClass name="org.eclipse.core.resources.IFolder"/>
-               </and>
-            </enablement>
-         </action>
-         </objectContribution>
-         
-          <objectContribution
-            objectClass="org.eclipse.core.resources.IResource"
-            nameFilter="*"
-            id="com.despegar.generatescript">
-         <action
-               class="wtfplugin.actions.NewScript"
-               icon="icons/link.gif"
-               id="wtfplugin.actions.NewScript"
-               label="Crear un script"
-               menubarPath="com.despegar/group1"
-               style="push"
-               enablesFor="1"
-               toolbarPath="window/additions">
-            <enablement>
-               <and>
-                  <objectClass name="org.eclipse.core.resources.IFolder"/>
-               </and>
-            </enablement>
-         </action>
-         
-         objectContribution
-            objectClass="org.eclipse.core.resources.ReleaseVersion"
-            nameFilter="*"
-            id="com.despegar.releaseversion">
-         <action
-               class="wtfplugin.actions.ReleaseVersion"
-               icon="icons/link.gif"
-               id="wtfplugin.actions.ReleaseVersion"
-               label="Genera el release de la version"
-               menubarPath="com.despegar/group1"
-               style="push"
-               enablesFor="1"
-               toolbarPath="window/additions">
-            <enablement>
-               <and>
-                  <objectClass name="org.eclipse.core.resources.IFolder"/>
-               </and>
-            </enablement>
-         </action>
-      </objectContribution>
-      
-      <objectContribution
-            objectClass="org.eclipse.core.resources.IResource"
-            nameFilter="*"
-            id="wtfplugin.actions.runScript">
-         <action
-               class="wtfplugin.actions.ExecuteScriptsFromSelection"
-               icon="icons/sql.gif"
-               id="wtfplugin.actions.runScript"
-               label="Ejecuta los scripts contra la base"
-               menubarPath="com.despegar/group1"
-               style="push">
-            <enablement>
-               <and>
-                  <objectClass name="org.eclipse.core.internal.resources.File"/>
-               </and>
-            </enablement>
-         </action>
-      </objectContribution>
-      
-      </extension>
+
       
       <extension
        point="org.eclipse.ui.startup">
@@ -254,14 +108,7 @@
           type="org.eclipse.jdt.launching.localJavaApplication">
     </launchDelegate>
    </extension-->
-   
-   <extension
-         id="invalidPersistentClassUse"
-         name="WTFPlugin.invalidPersistentClassUse"
-         point="org.eclipse.core.resources.markers">
-      <persistent value="true"/>
-      <super type="org.eclipse.core.resources.problemmarker"/>
-   </extension>
+ 
    
 
 </plugin>

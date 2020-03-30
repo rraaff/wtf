@@ -1,6 +1,4 @@
 <?xml version='1.0' encoding='utf-8'?>
 <Context>
-	<Valve className="com.dawsonsystems.session.MongoSessionTrackerValve" />
-<Manager className="com.dawsonsystems.session.MongoManager" host="@mongosessionhost@" port="27017" database="@mongostore@" maxInactiveInterval="180000" useProxySessions="true"/>
-    <WatchedResource>WEB-INF/web.xml</WatchedResource>
+	  <JarScanner scanManifest="false"/>
 </Context>

@@ -43,12 +43,11 @@ import wtfplugin.Activator;
 import wtfplugin.preferences.WTFPreferences;
 
 public class LaunchTomcat extends ActionDelegate implements IWorkbenchWindowActionDelegate {
-	
+
 	protected static String contextxml = null;
-	
-	protected static String serverxml = null; 
+
+	protected static String serverxml = null;
 	protected static byte keystore[];
-	
 
 	public LaunchTomcat() {
 	}
@@ -62,39 +61,44 @@ public class LaunchTomcat extends ActionDelegate implements IWorkbenchWindowActi
 
 	public void launchDefaultTomcat() {
 		try {
-			
+
 			IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-			IWorkbench workbench = PlatformUI.getWorkbench();
-			
+
 			IProject[] projects = root.getProjects();
 			for (IProject pro : projects) {
 				if (pro.isOpen()) {
-						if (pro.hasNature(JavaCore.NATURE_ID)) {
-							IFile file = pro.getFile(".wtf");
-							InputStream is = null;
-							try {
-								if (file != null && file.exists()) {
-										Properties props = new Properties();
-										is = file.getContents();
-										props.load(is);
-										if ("true".equals(props.getProperty("default", "true"))) {
-											LaunchTomcat.launchTomcat(pro, props.getProperty("contextPath", "/" + pro.getName()), props.getProperty("port", "8080"), props.getProperty("httpsPort", "8443"),props.getProperty("serverport", "8208"), props.getProperty("contextcontent",""), props.getProperty("jvmargs",""), props.getProperty("tomcatVersion", WTFPreferences.getTomcatVersion()));
-											return;
-										}
+					if (pro.hasNature(JavaCore.NATURE_ID)) {
+						IFile file = pro.getFile(".wtf");
+						InputStream is = null;
+						try {
+							if (file != null && file.exists()) {
+								Properties props = new Properties();
+								is = file.getContents();
+								props.load(is);
+								if ("true".equals(props.getProperty("default", "true"))) {
+									LaunchTomcat.launchTomcat(pro,
+											props.getProperty("contextPath", "/" + pro.getName()),
+											props.getProperty("port", "8080"), props.getProperty("httpsPort", "8443"),
+											props.getProperty("serverport", "8208"),
+											props.getProperty("docbase", "/scr/main/webapp"),
+											props.getProperty("contextcontent", ""), props.getProperty("jvmargs", ""),
+											props.getProperty("tomcatVersion", WTFPreferences.getTomcatVersion()));
+									return;
 								}
-							} finally {
-								if (is!= null) {
-									try {
-										is.close();
-									} catch (IOException e1) {
-										Activator.showException(e1);
-									}
+							}
+						} finally {
+							if (is != null) {
+								try {
+									is.close();
+								} catch (IOException e1) {
+									Activator.showException(e1);
 								}
 							}
 						}
 					}
+				}
 			}
-			
+
 //			String webappname = "/corporate";
 //			IProject project = root.getProject("corporate");
 //			File file = null;
@@ -115,23 +119,17 @@ public class LaunchTomcat extends ActionDelegate implements IWorkbenchWindowActi
 		}
 	}
 
-	public static void launchTomcat(IProject project, String webappname, String port, String httpsPort, String serverPort, String contextContent, String jvmArgs, String tomcatVersion) throws CoreException, IOException, JavaModelException {
+	public static void launchTomcat(IProject project, String webappname, String port, String httpsPort,
+			String serverPort, String docbase, String contextContent, String jvmArgs, String tomcatVersion)
+			throws CoreException, IOException, JavaModelException {
 		if ("9".equals(tomcatVersion)) {
-			LaunchTomcat9.launchTomcat(project, webappname, port, httpsPort, serverPort, contextContent, jvmArgs);
+			LaunchTomcat9.launchTomcat(project, webappname, port, httpsPort, serverPort, docbase, contextContent, jvmArgs);
 		} else {
 			if ("8".equals(tomcatVersion)) {
-				LaunchTomcat8.launchTomcat(project, webappname, port, httpsPort, serverPort, contextContent, jvmArgs);
-			} else {
-				if ("7".equals(tomcatVersion)) {
-					LaunchTomcat7.launchTomcat(project, webappname, port, httpsPort, serverPort, contextContent, jvmArgs);
-				} else {
-					LaunchTomcat6.launchTomcat(project, webappname, port, httpsPort, serverPort, contextContent, jvmArgs);
-				}
+				LaunchTomcat8.launchTomcat(project, webappname, port, httpsPort, serverPort, docbase, contextContent, jvmArgs);
 			}
 		}
 	}
-
-
 
 	public void init(IWorkbenchWindow window) {
 		// TODO Auto-generated method stub

@@ -45,7 +45,7 @@
        unpackWARs="true" autoDeploy="false"
        xmlValidation="false" xmlNamespaceAware="false">
 
-<Context path="@contextpath@" reloadable="true" docBase="@docbase@" workDir="@workdir@" >
+<Context path="@contextpath@" reloadable="false" docBase="@docbase@" workDir="@workdir@" >
    <Logger className="org.apache.catalina.logger.SystemOutLogger" verbosity="4" timestamp="true"/>
    @contextcontent@
 </Context>
