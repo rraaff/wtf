@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -113,7 +114,7 @@ public class LaunchTomcat9 {
 
 		file = ResourcesPlugin.getWorkspace().getRoot().getRawLocation().toFile();
 		String docbaseAbsolute = file + docbase ;
-		String appbase = new File(docbaseAbsolute).getParentFile().getAbsolutePath();
+		String appbase = Files.createTempDirectory(webappname).toFile().getAbsolutePath();
 		String workdir = docbaseAbsolute + "/work";
 
 		// Borro el keystore viejo
@@ -199,8 +200,8 @@ public class LaunchTomcat9 {
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, classpath);
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, false);
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
-				"-Djava.endorsed.dirs=\"..\\common\\endorsed\"" + "-Dcatalina.base=\"..\"" + "-Dcatalina.home=\"..\""
-						+ "-Djava.io.tmpdir=\"..\\temp\" " + (jvmArgsParams));
+				" -Djava.endorsed.dirs=\"..\\common\\endorsed\"" + " -Dcatalina.base=\"..\"" + " -Dcatalina.home=\"..\""
+						+ " -Djava.io.tmpdir=\"..\\temp\" " + (jvmArgsParams));
 
 		File workingDir = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable("9")).append("bin").toFile();
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_WORKING_DIRECTORY,
