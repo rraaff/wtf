@@ -117,7 +117,9 @@ public class LaunchTomcat8 {
 		
 		file = ResourcesPlugin.getWorkspace().getRoot().getRawLocation().toFile();
 		String fulldocbase = file + docbase;
-		String appbase = Files.createTempDirectory(webappname).toFile().getAbsolutePath();
+		File temporaryAppBase = Files.createTempDirectory(String.valueOf(System.currentTimeMillis())).toFile();
+		temporaryAppBase.deleteOnExit();
+		String appbase = temporaryAppBase.getAbsolutePath();
 		String workdir = fulldocbase + "/work";
 		
 		// Borro el keystore viejo
