@@ -6,8 +6,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.core.resources.IFile;
@@ -82,6 +85,7 @@ public class LaunchTomcat8 {
 		ILaunchConfigurationWorkingCopy workingCopy = type.newInstance(null, LaunchTomcat9.getLaunchName(project));
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_INSTALL_NAME, jre.getName());
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_INSTALL_TYPE, jre.getVMInstallType().getId());
+		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, project.getName());
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, "org.apache.catalina.startup.Bootstrap");
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, "-config "+System.getProperty("java.io.tmpdir") + "/"+LaunchTomcat9.getLaunchName(project)+"_server.xml"+" start");
 		IPath toolsPath = new Path(jdkHome.getAbsolutePath()).append("lib").append("tools.jar");
@@ -115,7 +119,7 @@ public class LaunchTomcat8 {
 			return;
 		}
 		
-		file = ResourcesPlugin.getWorkspace().getRoot().getRawLocation().toFile();
+		file = project.getRawLocation().toFile();
 		String fulldocbase = file + docbase;
 		File temporaryAppBase = Files.createTempDirectory(String.valueOf(System.currentTimeMillis())).toFile();
 		temporaryAppBase.deleteOnExit();
@@ -186,7 +190,8 @@ public class LaunchTomcat8 {
 		classpath.add(projectOutputPath.getMemento());
 		
 //			classpath.add("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><runtimeClasspathEntry path=\"/home/mgodoy/gitorious/test_plugin/wtf/wtf-service-web/target/classes\" type=\"1\"/>");
-		addToClasspath(classpath, javaProject);
+		addToClasspath(classpath, javaProject, new HashSet());
+		Collections.sort(classpath);
 		
 		String jvmArgsParams = jvmArgs;
 		if (jvmArgsParams == null) {
@@ -195,8 +200,8 @@ public class LaunchTomcat8 {
 		
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, classpath);
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, false);
-		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, " -Djava.endorsed.dirs=\"..\\common\\endorsed\""
-				+ " -Dcatalina.base=\"..\"" + " -Dcatalina.home=\"..\"" + " -Djava.io.tmpdir=\"..\\temp\" " + (jvmArgsParams));
+		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, " -Djava.endorsed.dirs=\"../common/endorsed\""
+				+ " -Dcatalina.base=\"..\"" + " -Dcatalina.home=\"..\"" + " -Djava.io.tmpdir=\"../temp\" " + (jvmArgsParams));
 		
 		
 		File workingDir = JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable("8")).append("bin").toFile();
@@ -205,7 +210,7 @@ public class LaunchTomcat8 {
 		DebugUITools.launch(configuration, ILaunchManager.DEBUG_MODE);
 	}
 
-	public static void addToClasspath( List classpath, IJavaProject javaProject) throws JavaModelException, CoreException {
+	public static void addToClasspath( List classpath, IJavaProject javaProject, Set alreadyAdded) throws JavaModelException, CoreException {
 		IClasspathEntry[] entries = javaProject.getRawClasspath(); 
 		int index = 0;
 		for (IClasspathEntry classpathEntry : entries) {
@@ -216,9 +221,12 @@ public class LaunchTomcat8 {
 						String projectName = path.lastSegment();
 						IProject refProject = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 						IJavaProject refProjectJava = JavaCore.create(refProject);
-						addToClasspath(classpath, refProjectJava);
+						addToClasspath(classpath, refProjectJava, alreadyAdded);
 					}
-					classpath.add(new RuntimeClasspathEntry(classpathEntry).getMemento());
+					if (!alreadyAdded.contains(classpathEntry)) {
+						alreadyAdded.add(classpathEntry);
+						classpath.add(new RuntimeClasspathEntry(classpathEntry).getMemento());
+					}
 				}
 			}
 		}
