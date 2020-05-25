@@ -56,7 +56,8 @@ public class LaunchTomcat8 {
 	}
 
 
-	public static void launchTomcat(IProject project, String webappname, String port, String httpsPort, String serverPort, String docbase, String contextContent, String jvmArgs) throws CoreException, IOException, JavaModelException {
+	public static void launchTomcat(IProject project, String webappname, String port, String httpsPort, String serverPort, String docbase, String contextContent, String jvmArgs,
+			String[] exclusions) throws CoreException, IOException, JavaModelException {
 		
 		if (JavaCore.getClasspathVariable(WTFPreferences.getTomcatVariable("8")) == null) {
 			Activator.showErrorMessage("Tomcat", "No se ha encontrado la variable TOMCAT8_HOME");
@@ -190,7 +191,7 @@ public class LaunchTomcat8 {
 		classpath.add(projectOutputPath.getMemento());
 		
 //			classpath.add("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><runtimeClasspathEntry path=\"/home/mgodoy/gitorious/test_plugin/wtf/wtf-service-web/target/classes\" type=\"1\"/>");
-		addToClasspath(classpath, javaProject, new HashSet());
+		addToClasspath(classpath, javaProject, new HashSet(), exclusions);
 		Collections.sort(classpath);
 		
 		String jvmArgsParams = jvmArgs;
@@ -210,7 +211,7 @@ public class LaunchTomcat8 {
 		DebugUITools.launch(configuration, ILaunchManager.DEBUG_MODE);
 	}
 
-	public static void addToClasspath( List classpath, IJavaProject javaProject, Set alreadyAdded) throws JavaModelException, CoreException {
+	public static void addToClasspath( List classpath, IJavaProject javaProject, Set alreadyAdded, String[] exclusions) throws JavaModelException, CoreException {
 		IClasspathEntry[] entries = javaProject.getRawClasspath(); 
 		int index = 0;
 		for (IClasspathEntry classpathEntry : entries) {
@@ -221,9 +222,9 @@ public class LaunchTomcat8 {
 						String projectName = path.lastSegment();
 						IProject refProject = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 						IJavaProject refProjectJava = JavaCore.create(refProject);
-						addToClasspath(classpath, refProjectJava, alreadyAdded);
+						addToClasspath(classpath, refProjectJava, alreadyAdded, exclusions);
 					}
-					if (!alreadyAdded.contains(classpathEntry)) {
+					if (!alreadyAdded.contains(classpathEntry) && !isExcluded(classpathEntry, exclusions)) {
 						alreadyAdded.add(classpathEntry);
 						classpath.add(new RuntimeClasspathEntry(classpathEntry).getMemento());
 					}
@@ -232,6 +233,16 @@ public class LaunchTomcat8 {
 		}
 	}
 	
+	private static boolean isExcluded(IClasspathEntry classpathEntry, String[] exclusions) {
+		for (int i =0; i < exclusions.length; i++) {
+			if (classpathEntry.getPath().toString().contains(exclusions[i])) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+
 	public static void addTomcatBinJarToClasspath(List classpath, String jar) throws CoreException {
 		IPath jspapijar = new Path(WTFPreferences.getTomcatVariable("8")).append("bin").append(jar);
 		IRuntimeClasspathEntry jspapijarEntry = JavaRuntime.newVariableRuntimeClasspathEntry(jspapijar);

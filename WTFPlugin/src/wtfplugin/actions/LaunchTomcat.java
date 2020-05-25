@@ -82,7 +82,8 @@ public class LaunchTomcat extends ActionDelegate implements IWorkbenchWindowActi
 											props.getProperty("serverport", "8208"),
 											props.getProperty("docbase", "/scr/main/webapp"),
 											props.getProperty("contextcontent", ""), props.getProperty("jvmargs", ""),
-											props.getProperty("tomcatVersion", WTFPreferences.getTomcatVersion()));
+											props.getProperty("tomcatVersion", WTFPreferences.getTomcatVersion()),
+											getExclusions(props));
 									return;
 								}
 							}
@@ -119,14 +120,25 @@ public class LaunchTomcat extends ActionDelegate implements IWorkbenchWindowActi
 		}
 	}
 
+	public static String[] getExclusions(Properties props) {
+		String[] result = props.getProperty("exclusions", "").split(",");
+		if (result != null) {
+			for (int i = 0; i< result.length; i++ ) {
+				result[i] = result[i].replace(':', '/');
+				result[i] = result[i].replace('.', '/');
+			}
+		}
+		return result;
+	}
+
 	public static void launchTomcat(IProject project, String webappname, String port, String httpsPort,
-			String serverPort, String docbase, String contextContent, String jvmArgs, String tomcatVersion)
+			String serverPort, String docbase, String contextContent, String jvmArgs, String tomcatVersion, String[] exclusions)
 			throws CoreException, IOException, JavaModelException {
 		if ("9".equals(tomcatVersion)) {
 			LaunchTomcat9.launchTomcat(project, webappname, port, httpsPort, serverPort, docbase, contextContent, jvmArgs);
 		} else {
 			if ("8".equals(tomcatVersion)) {
-				LaunchTomcat8.launchTomcat(project, webappname, port, httpsPort, serverPort, docbase, contextContent, jvmArgs);
+				LaunchTomcat8.launchTomcat(project, webappname, port, httpsPort, serverPort, docbase, contextContent, jvmArgs, exclusions);
 			}
 		}
 	}

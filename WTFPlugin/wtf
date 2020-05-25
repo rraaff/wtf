@@ -4,4 +4,5 @@ httpsPort=8443
 serverport=8208
 contextcontent=
 jvmargs=
+exclusions=group:artifact
 default=true
