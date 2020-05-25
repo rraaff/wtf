@@ -13,6 +13,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -235,8 +236,10 @@ public class LaunchTomcat8 {
 	
 	private static boolean isExcluded(IClasspathEntry classpathEntry, String[] exclusions) {
 		for (int i =0; i < exclusions.length; i++) {
-			if (classpathEntry.getPath().toString().contains(exclusions[i])) {
-				return true;
+			if (!StringUtils.isEmpty(exclusions[i])) {
+				if (classpathEntry.getPath().toString().contains(exclusions[i])) {
+					return true;
+				}
 			}
 		}
 		return false;
