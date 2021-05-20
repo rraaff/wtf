@@ -121,7 +121,8 @@ public class LaunchTomcat8 {
 			return;
 		}
 		
-		file = project.getRawLocation().toFile();
+		IPath location = project.getRawLocation() == null ? project.getLocation() : project.getRawLocation();
+		file = location.toFile();
 		String fulldocbase = file + docbase;
 		File temporaryAppBase = Files.createTempDirectory(String.valueOf(System.currentTimeMillis())).toFile();
 		temporaryAppBase.deleteOnExit();
